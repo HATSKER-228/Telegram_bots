@@ -1,4 +1,6 @@
 import telebot
+from keep_alive import keep_alive
+keep_alive()
 
 QWERTY_TO_YTSUKEN: dict = {
 	'@': '"', '#': '№', '$': ';', '^': ':', '&': '?',
