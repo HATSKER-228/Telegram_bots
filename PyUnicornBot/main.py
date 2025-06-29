@@ -1,4 +1,5 @@
 import telebot
+import os
 from keep_alive import keep_alive
 keep_alive()
 
@@ -12,8 +13,7 @@ QWERTY_TO_YTSUKEN: dict = {
 	'/': '.', '?': ','
 }
 YTSUKEN_TO_QWERTY: dict = dict([(value, key) for key, value in QWERTY_TO_YTSUKEN.items()])
-TOKEN = '8091887911:AAHJVdjcS-PETMZ_fdEM4M-SWzmOTE4VWEQ'
-BOT = telebot.TeleBot(TOKEN)
+BOT = telebot.TeleBot(os.environ.get('TOKEN'))
 
 
 def fix_qwerty(s: str) -> str:
