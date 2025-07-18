@@ -1,4 +1,9 @@
-import telebot
+import asyncio
+from aiogram import Bot, Dispatcher
+from aiogram.enums import ChatType
+from aiogram.filters import Command
+from aiogram.types import Message
+from aiogram import F
 import os
 from keep_alive import keep_alive
 keep_alive()
@@ -13,7 +18,6 @@ QWERTY_TO_YTSUKEN: dict = {
 	'/': '.', '?': ','
 }
 YTSUKEN_TO_QWERTY: dict = dict([(value, key) for key, value in QWERTY_TO_YTSUKEN.items()])
-BOT = telebot.TeleBot(os.environ.get('TOKEN'))
 
 
 def fix_qwerty(s: str) -> str:
@@ -48,40 +52,41 @@ def determinate_lang(text: str) -> str:
 	return 'eng'
 
 
-@BOT.message_handler(chat_types=['private'], commands=['start'])
-def start_cmd(message):
-	BOT.send_message(message.chat.id,
-					 'Привіт, пупсику. Я - Unicorn Bot. Ти можеш побачити, що я вмію робити, надіславши команду /help.')
+bot = Bot(token=os.environ.get('TOKEN'))
+dp = Dispatcher()
 
 
-@BOT.message_handler(chat_types=['group', 'supergroup'], commands=['start'])
-def start_cmd(message):
-	BOT.send_message(message.chat.id,
-					 'Привіт, пупсики. Я - Unicorn Bot. Ви можете побачити, що я вмію робити, надіславши команду /help@PyUnicornBot.')
+@dp.message(Command("start"), F.chat.type == ChatType.PRIVATE)
+async def start_private(message: Message) -> None:
+	await message.answer("Привіт, пупсику. Я - Unicorn Bot. Ти можеш побачити, що я вмію робити, надіславши команду /help.")
 
 
-@BOT.message_handler(commands=['help'])
-def help_cmd(message):
-	BOT.send_message(message.chat.id,
-					 '''Ось список того, що я вмію:
+@dp.message(Command("start"), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP}))
+async def start_group(message: Message) -> None:
+	await message.answer("Привіт, пупсики. Я - Unicorn Bot. Ви можете побачити, що я вмію робити, надіславши команду /help@PyUnicornBot.")
+
+
+@dp.message(Command("help"))
+async def help_command(message: Message) -> None:
+	await message.answer("""Ось список того, що я вмію:
 /start - привітаннячка від мене
 /help - надішлю оце повідомлення
-/fix - виправлю розкладку повідомлення (з qwerty на йцукен, або ж навпаки)''')
+/fix - виправлю розкладку повідомлення (з qwerty на йцукен, або ж навпаки)""")
 
 
-@BOT.message_handler(commands=['fix'])
-def fix_cmd(message):
-	if to_fix := message.reply_to_message:
-		if to_fix.content_type == 'text':
-			if determinate_lang(to_fix.text) == 'ua':
-				fixed: str = fix_ytsuken(to_fix.text)
-			else:
-				fixed: str = fix_qwerty(to_fix.text)
-			BOT.reply_to(to_fix, fixed)
-			return
-	BOT.reply_to(message, 'Command must be a reply to another <u><i>text</i></u> message!', parse_mode='HTML')
+@dp.message(Command("fix"))
+async def fix_command(message: Message) -> None:
+	if message.reply_to_message and message.reply_to_message.text:
+		text = message.reply_to_message.text
+		fixed = fix_ytsuken(text) if determinate_lang(text) == 'ua' else fix_qwerty(text)
+		await message.reply_to_message.reply(fixed)
+	else:
+		await message.reply('Command must be a reply to another <u><i>text</i></u> message!', parse_mode='HTML')
 
 
-if __name__ == '__main__':
-	print('Bot starting...')
-	BOT.polling()
+async def main() -> None:
+	await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+	asyncio.run(main())
