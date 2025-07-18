@@ -4,7 +4,9 @@ from aiogram.enums import ChatType
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram import F
+
 import os
+from baby_data import register_user, unregister_user, get_stats, select_baby
 from keep_alive import keep_alive
 keep_alive()
 
@@ -56,32 +58,80 @@ bot = Bot(token=os.environ.get('TOKEN'))
 dp = Dispatcher()
 
 
-@dp.message(Command("start"), F.chat.type == ChatType.PRIVATE)
-async def start_private(message: Message) -> None:
-	await message.answer("Привіт, пупсику. Я - Unicorn Bot. Ти можеш побачити, що я вмію робити, надіславши команду /help.")
+@dp.message(Command('start'), F.chat.type == ChatType.PRIVATE)
+async def cmd_start_private(message: Message) -> None:
+	await message.answer('Привіт, пупсику ❤️. Я - Unicorn Bot. Ти можеш побачити, що я вмію робити, надіславши команду /help.')
 
 
-@dp.message(Command("start"), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP}))
-async def start_group(message: Message) -> None:
-	await message.answer("Привіт, пупсики. Я - Unicorn Bot. Ви можете побачити, що я вмію робити, надіславши команду /help@PyUnicornBot.")
+@dp.message(Command('start'), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP}))
+async def cmd_start_group(message: Message) -> None:
+	await message.answer('Привіт, пупсики ❤️. Я - Unicorn Bot. Ви можете побачити, що я вмію робити, надіславши команду /help@PyUnicornBot.')
 
 
-@dp.message(Command("help"))
-async def help_command(message: Message) -> None:
-	await message.answer("""Ось список того, що я вмію:
+@dp.message(Command('help'))
+async def cmd_help(message: Message) -> None:
+	await message.answer('''Ось список того, що я вмію:
 /start - привітаннячка від мене
 /help - надішлю оце повідомлення
-/fix - виправлю розкладку повідомлення (з qwerty на йцукен, або ж навпаки)""")
+/fix - виправлю розкладку повідомлення (з qwerty на йцукен, або ж навпаки)
+
+<b>!!!Тільки в групі!!!</b>
+/baby_reg - зареєструю користувача до кандидатів на звання Пупсика дня
+/baby_unreg - видалю користувача із кандидатів на звання Пупсика дня
+/baby_select - оберу Пупсика дня (лише раз в день)
+/baby_stats - надішлю статистику хто скільки разів був Пупсиком дня''', parse_mode='HTML')
 
 
-@dp.message(Command("fix"))
-async def fix_command(message: Message) -> None:
+@dp.message(Command('fix'))
+async def cmd_fix(message: Message) -> None:
 	if message.reply_to_message and message.reply_to_message.text:
 		text = message.reply_to_message.text
 		fixed = fix_ytsuken(text) if determinate_lang(text) == 'ua' else fix_qwerty(text)
 		await message.reply_to_message.reply(fixed)
 	else:
-		await message.reply('Command must be a reply to another <u><i>text</i></u> message!', parse_mode='HTML')
+		await message.reply('Шановний тупорилий представник виду <i>Homo Sapiens</i>, команду необхідно писати у ВІДПОВІДЬ на ТЕКСТОВЕ повідомлення 🧌', parse_mode='HTML')
+
+
+@dp.message(Command('baby_reg'), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP}))
+async def cmd_baby_reg(message: Message) -> None:
+	user = message.from_user
+	added = register_user(message.chat.id, user.id, user.username)
+	if added:
+		await message.reply(f'{user.full_name} тепер у списку пупсиків! 🐣')
+	else:
+		await message.reply('Ти вже зареєстрований як пупсик 😘')
+
+
+@dp.message(Command('baby_unreg'), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP}))
+async def cmd_baby_unreg(message: Message) -> None:
+	user = message.from_user
+	deleted = unregister_user(message.chat.id, user.id, user.username)
+	if deleted:
+		await message.reply(f'{user.full_name} покинув список пупсиків 😭')
+	else:
+		await message.reply(f'{user.full_name} не було в списку пупсиків. Варто приєднатися!')
+
+
+@dp.message(Command('baby_select'), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP}))
+async def cmd_baby_play(message: Message) -> None:
+	username, error = select_baby(message.chat.id)
+	if error:
+		await message.reply(error)
+	else:
+		await message.reply(f'🎉 Пупсік дня — @{username}!')
+
+
+@dp.message(Command('baby_stats'), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP}))
+async def cmd_baby_stats(message: Message) -> None:
+	data = get_stats(message.chat.id)
+	if data:
+		s = 'Статистика пупсиків дня:\n'
+		for index, user_info in enumerate(data):
+			row = f'{index+1}) {user_info[0]} - {user_info[1]}\n'
+			s += row
+		await message.reply(s)
+	else:
+		await message.reply('У цьому чаті ще немає зареєстрованих пупсіків!')
 
 
 async def main() -> None:

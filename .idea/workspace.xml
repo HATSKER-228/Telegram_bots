@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="secure commit(maybe)">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="aiogram">
+      <change afterPath="$PROJECT_DIR$/PyUnicornBot/baby_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PyUnicornBot/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/main.py" afterDir="false" />
     </list>
@@ -36,12 +36,12 @@
     &quot;assignee&quot;: &quot;HATSKER-228&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/HATSKER-228/Telegram_bots.git",
-    "accountId": "661fcaca-052d-45ba-82a7-e6dba8eeaae4"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/HATSKER-228/Telegram_bots.git&quot;,
+    &quot;accountId&quot;: &quot;661fcaca-052d-45ba-82a7-e6dba8eeaae4&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -57,6 +57,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.baby_data.executor": "Run",
     "Python.main.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -73,7 +74,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-348a24fa61fa-5312c7369657-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-251.23774.444" />
+        <option value="bundled-python-sdk-4c141bd692a7-e2d783800521-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-251.26927.90" />
       </set>
     </attachedChunks>
   </component>
@@ -152,7 +153,23 @@
       <option name="project" value="LOCAL" />
       <updated>1751203721605</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="aiogram">
+      <option name="closed" value="true" />
+      <created>1752854679216</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1752854679216</updated>
+    </task>
+    <task id="LOCAL-00010" summary="aiogram">
+      <option name="closed" value="true" />
+      <created>1752855396139</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1752855396139</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -174,6 +191,7 @@
     <MESSAGE value="scalingo commit" />
     <MESSAGE value="commit" />
     <MESSAGE value="secure commit(maybe)" />
-    <option name="LAST_COMMIT_MESSAGE" value="secure commit(maybe)" />
+    <MESSAGE value="aiogram" />
+    <option name="LAST_COMMIT_MESSAGE" value="aiogram" />
   </component>
 </project>
