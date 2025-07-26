@@ -241,7 +241,7 @@ async def cmd_numbers_guess(message: Message) -> None:
 			result = 'chance for draw'
 		else:
 			result = 'continue'
-	print(result)
+
 	match result:
 		case 'user win':
 			ending = ''
