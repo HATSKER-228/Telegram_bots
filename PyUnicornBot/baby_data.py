@@ -2,7 +2,7 @@ import json
 import os
 from random import choice
 from datetime import date
-FILE_PATH = 'data.json'
+FILE_PATH = 'data_baby.json'
 
 
 def get_today() -> str:
