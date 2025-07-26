@@ -1,13 +1,11 @@
 import asyncio
-import os
-
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ChatType
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, User
 from aiogram import F
 
-# import os
+import os
 from baby_data import register_user, unregister_user, get_stats, select_baby
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, get_opponent_id, get_guesses, delete_game, get_user_finished
 from keyboards import kb_join_game
