@@ -5,6 +5,10 @@ from datetime import date
 FILE_PATH = 'data_baby.json'
 
 
+def get_path():
+	return FILE_PATH
+
+
 def get_today() -> str:
     return date.today().isoformat()
 

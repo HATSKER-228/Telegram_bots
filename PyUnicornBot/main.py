@@ -2,11 +2,11 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ChatType
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, User
+from aiogram.types import Message, CallbackQuery, User, FSInputFile
 from aiogram import F
 
 import os
-from baby_data import register_user, unregister_user, get_stats, select_baby
+from baby_data import register_user, unregister_user, get_stats, select_baby, get_path
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, get_opponent_id, get_guesses, delete_game, get_user_finished
 from keyboards import kb_join_game
 from keep_alive import keep_alive
@@ -314,6 +314,12 @@ async def callback_join_game(callback: CallbackQuery) -> None:
 		await callback.bot.send_message(joiner.id, instructions)
 	else:
 		await callback.answer(text=msg, show_alert=True)
+
+
+@dp.message(Command('get_baby_stats'), F.chat.type == 'private', F.from_user.id == 1250738671)
+async def admin_panel(message: Message) -> None:
+	file = FSInputFile(get_path())
+	await message.answer_document(file, caption='Ось файл зі статистикою пупсиків 👶')
 
 
 @dp.message(F.chat.type == 'private')
