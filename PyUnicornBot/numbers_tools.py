@@ -112,6 +112,17 @@ def delete_game(chat_id: int) -> None:
     save_data(data)
 
 
+def get_number(chat_id: int, user_id: int) -> int | None:
+    str_chat_id = str(chat_id)
+    str_user_id = str(user_id)
+    data = load_data()
+
+    if str_chat_id not in data or str_user_id not in data[str_chat_id]['players']:
+        return None
+
+    return data[str_chat_id]['players'][str_user_id]['number']
+
+
 def get_clue(guess: str, target: str) -> str:
     o = 0
     x = 0

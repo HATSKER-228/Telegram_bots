@@ -6,8 +6,10 @@ from aiogram.types import Message, CallbackQuery, User, FSInputFile
 from aiogram import F
 import shutil
 import os
+from random import randint
 from baby_data import register_user, unregister_user, get_stats, select_baby, get_path
-from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, get_opponent_id, get_guesses, delete_game, get_user_finished
+from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
+from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number
 from keyboards import kb_join_game
 from keep_alive import keep_alive
 keep_alive()
@@ -86,6 +88,8 @@ async def cmd_help(message: Message) -> None:
 /start - привітаннячка від мене
 /help - надішлю оце повідомлення
 /fix - виправлю розкладку повідомлення (з qwerty на йцукен, або ж навпаки)
+/shypko - оціню повідомлення від 0 до 10
+/rules - надішлю правила кожної мінігри
 
 <b>!!!Тільки в групі!!!</b>
 <u>Пупсик дня</u>
@@ -109,6 +113,39 @@ async def cmd_fix(message: Message) -> None:
     else:
         await message.reply('Шановний тупорилий представник виду <i>Homo Sapiens</i>, команду необхідно писати у '
                             'ВІДПОВІДЬ на ТЕКСТОВЕ повідомлення 🧌', parse_mode='HTML')
+
+
+@dp.message(Command('shypko'))
+async def cmd_shypko(message: Message) -> None:
+    if message.reply_to_message:
+        await message.reply_to_message.reply(f'Я оцінюю це повідомлення на {randint(0, 10)} шипко з 10.')
+    else:
+        await message.reply('Шановний тупорилий представник виду <i>Homo Sapiens</i>, команду необхідно писати у '
+                            'ВІДПОВІДЬ на повідомлення 🧌', parse_mode='HTML')
+
+
+@dp.message(Command('rules'))
+async def cmd_rules(message: Message) -> None:
+    text = '''📜 <b>Правила мініігор</b>
+👶 <i>Пупсик дня:</i>
+• Щоб долучитися, напиши мені /baby_reg.
+• Якщо передумаєш — вийди з гри командою /baby_unreg.
+• Я можу обрати пупсика дня — для цього напиши /baby_select.
+• Я обираю випадкового гравця зі списку, і роблю це лише один раз на день.
+• Подивитися, скільки разів хто ставав пупсиком, можна через /baby_stats.
+    
+🎯 <i>Гра "Числа":</i>
+• Це гра для двох гравців, які мають бути в одній групі.
+• Створити гру можна командою /numbers_create.
+• Я сам напишу кожному з гравців у приват і попрошу загадати 4-цифрове число з різних цифр.
+• Після цього гравці по черзі надсилають мені здогадки командою, наприклад /numbers_guess 1234.
+• Я у відповідь надсилаю підказку:
+    X — цифра є і стоїть на правильному місці.
+    O — цифра є, але стоїть не там.
+• Виграє той, хто першим вгадає число суперника повністю.
+• Якщо хочете зупинити гру — напишіть /numbers_cancel.
+• В одній групі може бути лише одна активна гра.'''
+    await message.answer(text, parse_mode='HTML')
 
 
 @dp.message(Command('baby_reg'))
@@ -250,7 +287,8 @@ async def cmd_numbers_guess(message: Message) -> None:
             elif 2 <= user_attempts <= 4:
                 ending = 'и'
             await message.answer(
-                f'🥳🎉 ПЕРЕМОГА!\n{user_link} вгадав(-ла) число за {user_attempts} спроб' + ending, parse_mode='HTML')
+                f'🥳🎉 ПЕРЕМОГА!\n{user_link} вгадав(-ла) число за {user_attempts} спроб{ending}.'
+                f'Його/Її число було: {get_number(chat_id, user.id)}', parse_mode='HTML')
             delete_game(chat_id)
 
         case 'opponent win':
@@ -259,8 +297,8 @@ async def cmd_numbers_guess(message: Message) -> None:
                 ending = 'у'
             elif 2 <= opponent_attempts <= 4:
                 ending = 'и'
-            await message.answer(f'🥳🎉 ПЕРЕМОГА!\n{opponent_link} вгадав(-ла) число за {opponent_attempts} спроб' + ending,
-                         parse_mode='HTML')
+            await message.answer(f'🥳🎉 ПЕРЕМОГА!\n{opponent_link} вгадав(-ла) число за {opponent_attempts} спроб{ending}.'
+                                 f'Його/Її число було: {get_number(chat_id, opponent.id)}', parse_mode='HTML')
             delete_game(chat_id)
 
         case 'draw':
