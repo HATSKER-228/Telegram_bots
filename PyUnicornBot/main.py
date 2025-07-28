@@ -9,8 +9,8 @@ import os
 from random import randint
 from baby_data import register_user, unregister_user, get_stats, select_baby, get_path
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
-from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number
-from keyboards import kb_join_game
+from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
+from keyboards import kb_join_game, kb_random_num
 from keep_alive import keep_alive
 keep_alive()
 
@@ -216,7 +216,7 @@ async def cmd_numbers_create_game(message: Message) -> None:
         await message.reply(f'🔢{get_link(message.from_user)} хоче зіграти в Числа!\nТикайте кнопку нижче👇',
                             reply_markup=kb_join_game(chat_id, user_id), parse_mode='HTML')
     else:
-        await message.reply('У цьому чаті вже розпочата гра.')
+        await message.reply('У цьому чаті вже створена гра.')
 
 
 @dp.message(Command('cancel'))
@@ -234,6 +234,7 @@ async def cmd_numbers_guess(message: Message) -> None:
     if message.chat.type == 'private':
         await message.reply('Цю команду можна використати тільки в групі 🧌')
         return
+
     chat_id = message.chat.id
     user = message.from_user
 
@@ -287,7 +288,7 @@ async def cmd_numbers_guess(message: Message) -> None:
             elif 2 <= user_attempts <= 4:
                 ending = 'и'
             await message.answer(
-                f'🥳🎉 ПЕРЕМОГА!\n{user_link} вгадав(-ла) число за {user_attempts} спроб{ending}.'
+                f'🥳🎉 ПЕРЕМОГА!\n{user_link} вгадав(-ла) число за {user_attempts} спроб{ending}.\n'
                 f'Його/Її число було: {get_number(chat_id, user.id)}', parse_mode='HTML')
             delete_game(chat_id)
 
@@ -297,7 +298,7 @@ async def cmd_numbers_guess(message: Message) -> None:
                 ending = 'у'
             elif 2 <= opponent_attempts <= 4:
                 ending = 'и'
-            await message.answer(f'🥳🎉 ПЕРЕМОГА!\n{opponent_link} вгадав(-ла) число за {opponent_attempts} спроб{ending}.'
+            await message.answer(f'🥳🎉 ПЕРЕМОГА!\n{opponent_link} вгадав(-ла) число за {opponent_attempts} спроб{ending}.\n'
                                  f'Його/Її число було: {get_number(chat_id, opponent.id)}', parse_mode='HTML')
             delete_game(chat_id)
 
@@ -312,7 +313,7 @@ async def cmd_numbers_guess(message: Message) -> None:
             elif 2 <= user_attempts <= 4:
                 ending = 'и'
             await message.answer(
-                f'{user_link} уже вгадав(-ла) число за {user_attempts} спроб' + ending + f', але {opponent_link} ще має шанс 🤔',
+                f'{user_link} уже вгадав(-ла) число за {user_attempts} спроб{ending}, але {opponent_link} ще має шанс 🤔',
                 parse_mode='HTML')
 
         case 'continue':
@@ -346,12 +347,28 @@ async def callback_join_game(callback: CallbackQuery) -> None:
             '✅ Число не повинно:\n'
             '• починатися з 0\n'
             '• мати повторювані цифри\n\n'
-            '📩 Просто надішли число без додаткових символів.'
+            '📩 Просто надішли число без додаткових символів.\n\n'
+            'Або тикай кнопку нижче, щоб я сам обрав для тебе число👇'
         )
-        await callback.bot.send_message(creator.id, instructions)
-        await callback.bot.send_message(joiner.id, instructions)
+        await callback.bot.send_message(creator.id, instructions, reply_markup=kb_random_num())
+        await callback.bot.send_message(joiner.id, instructions, reply_markup=kb_random_num())
     else:
         await callback.answer(text=msg, show_alert=True)
+
+
+@dp.callback_query(F.data == 'gen_random_num')
+async def callback_gen_random_num(callback: CallbackQuery):
+    str_number = get_random_num()
+    instructions = (
+        '🧠 Чекаю ваше 4-цифрове число!\n\n'
+        '✅ Число не повинно:\n'
+        '• починатися з 0\n'
+        '• мати повторювані цифри\n\n'
+        '📩 Просто надішли число без додаткових символів.\n\n'
+        f'Можеш обрати число <u>{str_number}</u>, або натиснути кнопку ще раз👇'
+    )
+    await callback.message.edit_text(text=instructions, reply_markup=kb_random_num(), parse_mode='HTML')
+    await callback.answer()
 
 
 @dp.message(Command('get_baby_stats'), F.chat.type == 'private', F.from_user.id == 1250738671)

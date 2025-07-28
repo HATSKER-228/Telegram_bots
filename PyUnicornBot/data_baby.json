@@ -15,7 +15,7 @@
             },
             "1273563420": {
                 "username": "rob0cat",
-                "count": 0
+                "count": 1
             },
             "1022024418": {
                 "username": "TYKVAvKVADRATI",
@@ -35,7 +35,7 @@
             },
             "1390262328": {
                 "username": "bydanov_kyrylo",
-                "count": 0
+                "count": 1
             },
             "1430385550": {
                 "username": "NaKa_cat",
@@ -50,7 +50,21 @@
                 "count": 0
             }
         },
-        "last_play": null,
-        "last_winner": null
+        "last_play": "2025-07-28",
+        "last_winner": 1390262328
+    },
+    "-1001536334970": {
+        "players": {
+            "573689212": {
+                "username": "Patison_22",
+                "count": 0
+            },
+            "701495323": {
+                "username": "nika_dk",
+                "count": 1
+            }
+        },
+        "last_play": "2025-07-28",
+        "last_winner": 701495323
     }
 }

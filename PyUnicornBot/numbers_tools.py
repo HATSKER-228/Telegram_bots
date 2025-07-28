@@ -1,7 +1,8 @@
 import json
 import os
+from random import sample
 
-FILE_PATH = 'data_numbers.json'
+FILE_PATH = 'PyUnicornBot/data_numbers.json'
 
 
 def load_data() -> dict:
@@ -56,7 +57,7 @@ def join_to_game(chat_id: int, user_id: int, creator_id: int) -> tuple[bool, str
         'finished': False,
     }
     data[str_chat_id]['turn'] = creator_id
-    data[str_chat_id]['status'] = 'ongoing'
+    data[str_chat_id]['status'] = 'setting numbers'
     save_data(data)
 
     return True, ''
@@ -67,12 +68,12 @@ def set_player_number(user_id: int, number_str: str) -> tuple[bool, str, int | N
     data = load_data()
 
     for str_chat_id, game in data.items():
-        if game['status'] != 'ongoing':
+        if game['status'] != 'setting numbers':
             continue
         if str_user_id not in game['players']:
             continue
         if game['players'][str_user_id]['number'] is not None:
-            return False, '❗ Ти вже надіслав(-ла) своє число.', None, None
+            return False, '❗ У тебе вже є число.', None, None
 
         if not number_str.isdigit() or len(number_str) != 4:
             return False, '❌ Число повинно містити рівно 4 цифри.', None, None
@@ -87,6 +88,9 @@ def set_player_number(user_id: int, number_str: str) -> tuple[bool, str, int | N
         all_ready = all(p['number'] is not None for p in game['players'].values())
         if all_ready:
             first_player_id = game['turn']
+            data = load_data()
+            data[str_chat_id]['status'] = 'ongoing'
+            save_data(data)
             return True, '✅ Число прийнято! Усі гравці готові.', int(str_chat_id), first_player_id
         else:
             return True, '✅ Число прийнято! Очікуємо опонента.', None, None
@@ -110,6 +114,13 @@ def delete_game(chat_id: int) -> None:
     data = load_data()
     del data[str(chat_id)]
     save_data(data)
+
+
+def get_random_num() -> str:
+    while True:
+        number = sample('0123456789', 4)
+        if number[0] != '0':
+            return ''.join(number)
 
 
 def get_number(chat_id: int, user_id: int) -> int | None:
@@ -170,6 +181,8 @@ def guess_number(chat_id: int, user_id: int, text: list) -> tuple[bool, str]:
 
     if str_chat_id not in data:
         return False, '⚠️ В цьому чаті не знайдено гри.'
+    if data[str_chat_id]['status'] == 'setting numbers':
+        return False, '⚠️ Не всі гравці обрали числа!'
     if data[str_chat_id]['status'] != 'ongoing':
         return False, '⚠️ В цьому чаті гра ще не розпочата.'
     if str_user_id not in data[str_chat_id]['players']:
