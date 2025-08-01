@@ -199,7 +199,29 @@ async def cmd_baby_stats(message: Message) -> None:
             s += row
         await message.reply(s)
     else:
-        await message.reply('У цьому чаті ще немає зареєстрованих пупсіків!')
+        await message.reply('У цьому чаті ще немає зареєстрованих пупсіків 😢')
+
+
+@dp.message(Command('all'))
+async def cmd_all(message: Message) -> None:
+    if message.chat.type == 'private':
+        await message.reply('Цю команду можна використати тільки в групі 🧌')
+        return
+    data = get_stats(message.chat.id)
+    if data:
+        await message.answer('Пупсики, всі сюди 🤗')
+        text = ''
+        count = 0
+        for i, user_info in enumerate(data):
+            text += f'@{user_info[0]}\n'
+            count += 1
+            if count == 5:
+                count = 0
+                await message.answer(text, parse_mode='HTML')
+                text = ''
+        await message.answer(text, parse_mode='HTML')
+    else:
+        await message.reply('У цьому чаті немає зареєстрованих пупсиків, яких я міг би покликати 😢')
 
 
 @dp.message(Command('create'))

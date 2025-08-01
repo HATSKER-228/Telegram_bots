@@ -17,7 +17,7 @@ def get_today() -> str:
 def load_data() -> dict:
     if not os.path.exists(FILE_PATH):
         return {}
-    with open(FILE_PATH, 'r', encoding='utf-8') as f:
+    with open(FILE_PATH, encoding='utf-8') as f:
         return json.load(f)
 
 
