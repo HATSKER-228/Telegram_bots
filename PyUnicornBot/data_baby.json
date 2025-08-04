@@ -7,7 +7,7 @@
             },
             "1396307938": {
                 "username": "Luzyk_top_i_borman_tezh_top",
-                "count": 0
+                "count": 1
             },
             "1471719619": {
                 "username": "miavvt",
@@ -27,7 +27,7 @@
             },
             "1629255381": {
                 "username": "toy_samiy_artem",
-                "count": 0
+                "count": 1
             },
             "573689212": {
                 "username": "Patison_22",
@@ -43,15 +43,23 @@
             },
             "1954200433": {
                 "username": "Cristawx",
-                "count": 1
+                "count": 2
             },
             "922499521": {
                 "username": "abizyanamavpa",
                 "count": 2
+            },
+            "5361674749": {
+                "username": "user_5361674749",
+                "count": 0
+            },
+            "1330882079": {
+                "username": "Rkerkerkerkerkerke",
+                "count": 0
             }
         },
-        "last_play": "2025-08-01",
-        "last_winner": 1430385550
+        "last_play": "2025-08-04",
+        "last_winner": 1954200433
     },
     "-1001536334970": {
         "players": {
@@ -79,10 +87,10 @@
             },
             "6339009805": {
                 "username": "user_6339009805",
-                "count": 1
+                "count": 2
             }
         },
-        "last_play": "2025-08-01",
-        "last_winner": 1250738671
+        "last_play": "2025-08-02",
+        "last_winner": 6339009805
     }
 }

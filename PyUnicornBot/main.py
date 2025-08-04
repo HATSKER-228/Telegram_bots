@@ -7,10 +7,10 @@ from aiogram import F
 import shutil
 import os
 from random import randint
-from baby_data import register_user, unregister_user, get_stats, select_baby, get_path
+from baby_data import register_user, unregister_user, get_stats, select_baby, get_path, is_in_list
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
 from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
-from keyboards import kb_join_game, kb_random_num
+from keyboards import kb_join_game, kb_random_num, kb_submit_baby_unreg
 from keep_alive import keep_alive
 keep_alive()
 
@@ -93,11 +93,11 @@ async def cmd_help(message: Message) -> None:
 
 <b>!!!Тільки в групі!!!</b>
 <u>Пупсик дня</u>
-/baby_reg - зареєструю користувача до кандидатів на звання Пупсика дня
-/baby_unreg - видалю користувача із кандидатів на звання Пупсика дня
+/baby_reg - додам тебе у список Пупсиків
+/baby_unreg - видалю тебе з Пупсиків
 /baby_select - оберу Пупсика дня (лише раз в день)
 /baby_stats - надішлю статистику хто скільки разів був Пупсиком дня
-/all - покличу усіх пупсиків у чат
+/all - покличу усіх Пупсиків у чат
 
 <u>Гра "Числа"</u>
 /create - створю гру
@@ -155,9 +155,10 @@ async def cmd_baby_reg(message: Message) -> None:
         await message.reply('Цю команду можна використати тільки в групі 🧌')
         return
     user = message.from_user
-    added = register_user(message.chat.id, user.id, user.username)
+
+    added = register_user(message.chat.id, user.id, user.username if user.username else user.full_name)
     if added:
-        await message.reply(f'{user.full_name} тепер у списку пупсиків! 🐣')
+        await message.reply(f'{get_link(user)} тепер у списку пупсиків! 🐣', parse_mode='HTML')
     else:
         await message.reply('Ти вже зареєстрований як пупсик 😘')
 
@@ -168,23 +169,26 @@ async def cmd_baby_unreg(message: Message) -> None:
         await message.reply('Цю команду можна використати тільки в групі 🧌')
         return
     user = message.from_user
-    deleted = unregister_user(message.chat.id, user.id, user.username)
-    if deleted:
-        await message.reply(f'{user.full_name} покинув список пупсиків 😭')
-    else:
-        await message.reply(f'{user.full_name} не було в списку пупсиків. Варто приєднатися!')
+    in_list = is_in_list(message.chat.id, user.id)
+    if not in_list:
+        await message.reply(f'{get_link(user)} не було в списку пупсиків. Варто приєднатися!', parse_mode='HTML')
+        return
+
+    kb = kb_submit_baby_unreg(message.chat.id, user.id)
+    await message.answer(f'{get_link(user)}, ти точно хочеш вийти зі списку Пупсиків?', parse_mode='HTML', reply_markup=kb)
+    await message.delete()
 
 
 @dp.message(Command('baby_select'))
-async def cmd_baby_play(message: Message) -> None:
+async def cmd_baby_select(message: Message) -> None:
     if message.chat.type == 'private':
         await message.reply('Цю команду можна використати тільки в групі 🧌')
         return
-    username, error = select_baby(message.chat.id)
+    winner, error = select_baby(message.chat.id)
     if error:
-        await message.reply(error)
+        await message.reply(error, parse_mode='HTML')
     else:
-        await message.reply(f'🎉 Пупсік дня — @{username}!')
+        await message.reply(f'🎉 Пупсик дня — <a href="tg://user?id={winner[0]}">{winner[1]}</a>!', parse_mode='HTML')
 
 
 @dp.message(Command('baby_stats'))
@@ -194,13 +198,13 @@ async def cmd_baby_stats(message: Message) -> None:
         return
     data = get_stats(message.chat.id)
     if data:
-        s = 'Статистика пупсиків дня:\n'
+        s = 'Статистика Пупсиків дня:\n'
         for index, user_info in enumerate(data):
             row = f'{index+1}) {user_info[0]} - {user_info[1]}\n'
             s += row
         await message.reply(s)
     else:
-        await message.reply('У цьому чаті ще немає зареєстрованих пупсіків 😢')
+        await message.reply('У цьому чаті ще немає зареєстрованих Пупсіків 😢')
 
 
 @dp.message(Command('all'))
@@ -222,7 +226,7 @@ async def cmd_all(message: Message) -> None:
                 text = ''
         await message.answer(text, parse_mode='HTML')
     else:
-        await message.reply('У цьому чаті немає зареєстрованих пупсиків, яких я міг би покликати 😢')
+        await message.reply('У цьому чаті немає зареєстрованих Пупсиків, яких я міг би покликати 😢')
 
 
 @dp.message(Command('create'))
@@ -380,7 +384,7 @@ async def callback_join_game(callback: CallbackQuery) -> None:
 
 
 @dp.callback_query(F.data == 'gen_random_num')
-async def callback_gen_random_num(callback: CallbackQuery):
+async def callback_gen_random_num(callback: CallbackQuery) -> None:
     str_number = get_random_num()
     instructions = (
         '🧠 Чекаю ваше 4-цифрове число!\n\n'
@@ -392,6 +396,27 @@ async def callback_gen_random_num(callback: CallbackQuery):
     )
     await callback.message.edit_text(text=instructions, reply_markup=kb_random_num(), parse_mode='HTML')
     await callback.answer()
+
+
+@dp.callback_query(F.data.startswith('baby_unreg'))
+async def callback_baby_unreg(callback: CallbackQuery) -> None:
+    _, action, str_chat_id, str_creator_id = callback.data.split('/')
+    user = callback.from_user
+
+    if user.id != int(str_creator_id):
+        await callback.answer(text='Ці кнопки не для тебе🧌', show_alert=True)
+        return
+    if action == 'decline':
+        await callback.answer(text='Виключення тебе з Пупсиків відхилено✅', show_alert=True)
+        await callback.message.delete()
+        return
+    deleted = unregister_user(int(str_chat_id), int(str_creator_id))
+    if deleted:
+        await callback.answer('Тебе було виключино з Пупсиків😢', show_alert=True)
+        await callback.message.answer(f'{get_link(user)} покинув список Пупсиків😭', parse_mode='HTML')
+        await callback.message.delete()
+    else:
+        await callback.answer(text='Тебе не було в списку пупсиків. Варто приєднатися!', show_alert=True)
 
 
 @dp.message(Command('get_baby_stats'), F.chat.type == 'private', F.from_user.id == 1250738671)

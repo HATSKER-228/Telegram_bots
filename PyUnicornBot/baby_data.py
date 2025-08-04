@@ -36,7 +36,7 @@ def register_user(chat_id: int, user_id: int, username: str) -> bool:
 
     if str_user_id not in data[str_chat_id]['players']:
         data[str_chat_id]['players'][str_user_id] = {
-            'username': username or f'user_{user_id}',
+            'username': username,
             'count': 0
         }
         save_data(data)
@@ -45,7 +45,22 @@ def register_user(chat_id: int, user_id: int, username: str) -> bool:
         return False  # вже був у списку
 
 
-def unregister_user(chat_id: int, user_id: int, username: str) -> bool:
+def is_in_list(chat_id: int, user_id: int):
+    data = load_data()
+    str_chat_id = str(chat_id)
+    str_user_id = str(user_id)
+
+    if str_chat_id not in data:
+        data[str_chat_id] = {'players': {}, 'last_play': None, 'last_winner': None}
+        save_data(data)
+
+    if str_user_id in data[str_chat_id]['players']:
+        return True
+    else:
+        return False
+
+
+def unregister_user(chat_id: int, user_id: int) -> bool:
     data = load_data()
     str_chat_id = str(chat_id)
     str_user_id = str(user_id)
@@ -76,18 +91,19 @@ def get_stats(chat_id: int) -> list | None:
     return sorted(stats, key=lambda x: x[1], reverse=True)
 
 
-def select_baby(chat_id: int):
+def select_baby(chat_id: int) -> tuple[tuple[int, str] | None, str | None]:
     data = load_data()
     str_chat_id = str(chat_id)
 
     if str_chat_id not in data or not data[str_chat_id]['players']:
-        return None, 'У цьому чаті ще немає зареєстрованих пупсіків!'
+        return None, 'У цьому чаті ще немає зареєстрованих пупсіків😢'
 
     today = get_today()
     if data[str_chat_id]['last_play'] == today:
         last_id = data[str_chat_id]['last_winner']
-        last_username = data[str_chat_id]['players'].get(str(last_id), {}).get('username', 'невідомий пупсік')
-        return None, f'Сьогоднішній пупсік уже обраний: @{last_username} 💖'
+        last_username = data[str_chat_id]['players'][last_id]['username']
+        tag = f'<a href="tg://user?id={last_id}">{last_username}</a>'
+        return None, f'Сьогоднішній пупсік уже обраний: {tag}💖'
 
     # вибираємо випадкового пупсіка
     players = data[str_chat_id]['players']
@@ -98,4 +114,4 @@ def select_baby(chat_id: int):
     data[str_chat_id]['last_winner'] = int(winner_id)
 
     save_data(data)
-    return players[winner_id]['username'], None
+    return (int(winner_id), players[winner_id]['username']), None
