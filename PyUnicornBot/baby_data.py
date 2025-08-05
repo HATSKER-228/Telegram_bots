@@ -3,10 +3,10 @@ import os
 from random import choice
 from datetime import date
 
-FILE_PATH = 'PyUnicornBot/data_baby.json'
+FILE_PATH: str = 'PyUnicornBot/data_baby.json'
 
 
-def get_path():
+def get_path() -> str:
     return FILE_PATH
 
 
@@ -26,8 +26,8 @@ def save_data(data: dict) -> None:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-def register_user(chat_id: int, user_id: int, username: str) -> bool:
-    data = load_data()
+def register_user(chat_id: int, user_id: int, username: str | None) -> bool:
+    data: dict = load_data()
     str_chat_id = str(chat_id)
     str_user_id = str(user_id)
 
@@ -40,13 +40,13 @@ def register_user(chat_id: int, user_id: int, username: str) -> bool:
             'count': 0
         }
         save_data(data)
-        return True  # був доданий новий користувач
+        return True
     else:
-        return False  # вже був у списку
+        return False
 
 
-def is_in_list(chat_id: int, user_id: int):
-    data = load_data()
+def is_in_list(chat_id: int, user_id: int) -> bool:
+    data: dict = load_data()
     str_chat_id = str(chat_id)
     str_user_id = str(user_id)
 
@@ -61,7 +61,7 @@ def is_in_list(chat_id: int, user_id: int):
 
 
 def unregister_user(chat_id: int, user_id: int) -> bool:
-    data = load_data()
+    data: dict = load_data()
     str_chat_id = str(chat_id)
     str_user_id = str(user_id)
 
@@ -72,13 +72,13 @@ def unregister_user(chat_id: int, user_id: int) -> bool:
     if str_user_id in data[str_chat_id]['players']:
         del data[str_chat_id]['players'][str_user_id]
         save_data(data)
-        return True  # був видалений зі списку
+        return True
     else:
-        return False  # нема у списку
+        return False
 
 
 def get_stats(chat_id: int) -> list | None:
-    data = load_data()
+    data: dict = load_data()
     str_chat_id = str(chat_id)
 
     if str_chat_id not in data or len(data[str_chat_id]['players']) == 0:
@@ -86,32 +86,39 @@ def get_stats(chat_id: int) -> list | None:
 
     stats = list()
     for str_user_id in data[str_chat_id]['players'].keys():
-        user_info = data[str_chat_id]['players'][str_user_id]
-        stats.append((user_info['username'], user_info['count']))
-    return sorted(stats, key=lambda x: x[1], reverse=True)
+        user_info: dict = data[str_chat_id]['players'][str_user_id]
+        stats.append((int(str_user_id), user_info['username'], user_info['count']))
+    return sorted(stats, key=lambda x: x[2], reverse=True)
 
 
-def select_baby(chat_id: int) -> tuple[tuple[int, str] | None, str | None]:
-    data = load_data()
+def get_ids(chat_id: int) -> list | None:
+    data: dict = load_data()
+    str_chat_id = str(chat_id)
+
+    if str_chat_id not in data or len(data[str_chat_id]['players']) == 0:
+        return None
+
+    return list(map(int, data[str_chat_id]['players'].keys()))
+
+
+def select_baby(chat_id: int) -> tuple[bool, int | None]:
+    data: dict = load_data()
     str_chat_id = str(chat_id)
 
     if str_chat_id not in data or not data[str_chat_id]['players']:
-        return None, 'У цьому чаті ще немає зареєстрованих пупсіків😢'
+        return False, None
 
-    today = get_today()
+    today: str = get_today()
     if data[str_chat_id]['last_play'] == today:
         last_id = data[str_chat_id]['last_winner']
-        last_username = data[str_chat_id]['players'][last_id]['username']
-        tag = f'<a href="tg://user?id={last_id}">{last_username}</a>'
-        return None, f'Сьогоднішній пупсік уже обраний: {tag}💖'
+        return False, last_id
 
-    # вибираємо випадкового пупсіка
-    players = data[str_chat_id]['players']
-    winner_id = choice(list(players.keys()))
+    players: dict = data[str_chat_id]['players']
+    winner_id: str = choice(list(players.keys()))
     players[winner_id]['count'] += 1
 
     data[str_chat_id]['last_play'] = today
     data[str_chat_id]['last_winner'] = int(winner_id)
 
     save_data(data)
-    return (int(winner_id), players[winner_id]['username']), None
+    return True, int(winner_id)

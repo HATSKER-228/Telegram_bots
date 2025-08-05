@@ -50,7 +50,7 @@
                 "count": 2
             },
             "5361674749": {
-                "username": "user_5361674749",
+                "username": null,
                 "count": 0
             },
             "1330882079": {
@@ -79,18 +79,18 @@
         "players": {
             "1250738671": {
                 "username": "Yizhak_na_avi",
-                "count": 1
+                "count": 2
             },
             "1430385550": {
                 "username": "NaKa_cat",
                 "count": 2
             },
             "6339009805": {
-                "username": "user_6339009805",
+                "username": null,
                 "count": 2
             }
         },
-        "last_play": "2025-08-02",
-        "last_winner": 6339009805
+        "last_play": "2025-08-04",
+        "last_winner": 1250738671
     }
 }

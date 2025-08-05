@@ -7,7 +7,7 @@ from aiogram import F
 import shutil
 import os
 from random import randint
-from baby_data import register_user, unregister_user, get_stats, select_baby, get_path, is_in_list
+from baby_data import register_user, unregister_user, get_stats, select_baby, get_path, is_in_list, get_ids
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
 from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
 from keyboards import kb_join_game, kb_random_num, kb_submit_baby_unreg
@@ -32,6 +32,10 @@ def get_tag(user: User) -> str:
 
 def get_link(user: User) -> str:
     return f'<a href="tg://user?id={user.id}">{user.full_name}</a>'
+
+
+async def get_user_from_chat(chat_id: int, user_id: int) -> User:
+    return (await bot.get_chat_member(chat_id, user_id)).user
 
 
 def fix_qwerty(s: str) -> str:
@@ -66,7 +70,7 @@ def determinate_lang(text: str) -> str:
     return 'eng'
 
 
-bot = Bot(token=os.environ.get('TOKEN'))
+bot = Bot(token='8159707276:AAF3y1TcSU_xzSSJF51qdkak-yK7BPCR198')
 dp = Dispatcher()
 
 
@@ -156,9 +160,9 @@ async def cmd_baby_reg(message: Message) -> None:
         return
     user = message.from_user
 
-    added = register_user(message.chat.id, user.id, user.username if user.username else user.full_name)
+    added = register_user(message.chat.id, user.id, user.username)
     if added:
-        await message.reply(f'{get_link(user)} тепер у списку пупсиків! 🐣', parse_mode='HTML')
+        await message.reply(f'{get_tag(user)} тепер у списку пупсиків! 🐣', parse_mode='HTML')
     else:
         await message.reply('Ти вже зареєстрований як пупсик 😘')
 
@@ -171,7 +175,7 @@ async def cmd_baby_unreg(message: Message) -> None:
     user = message.from_user
     in_list = is_in_list(message.chat.id, user.id)
     if not in_list:
-        await message.reply(f'{get_link(user)} не було в списку пупсиків. Варто приєднатися!', parse_mode='HTML')
+        await message.reply(f'{get_tag(user)} не було в списку пупсиків. Варто приєднатися!', parse_mode='HTML')
         return
 
     kb = kb_submit_baby_unreg(message.chat.id, user.id)
@@ -184,11 +188,16 @@ async def cmd_baby_select(message: Message) -> None:
     if message.chat.type == 'private':
         await message.reply('Цю команду можна використати тільки в групі 🧌')
         return
-    winner, error = select_baby(message.chat.id)
-    if error:
-        await message.reply(error, parse_mode='HTML')
+    chat_id: int = message.chat.id
+    is_successful, baby_id = select_baby(chat_id)
+    if is_successful:
+        baby = await get_user_from_chat(chat_id, baby_id)
+        await message.answer(f'🎉 Пупсик дня — {get_tag(baby)}!', parse_mode='HTML')
+    elif baby_id:
+        baby = await get_user_from_chat(chat_id, baby_id)
+        await message.reply(f'Сьогоднішній пупсік уже обраний: {get_tag(baby)}💖', parse_mode='HTML')
     else:
-        await message.reply(f'🎉 Пупсик дня — <a href="tg://user?id={winner[0]}">{winner[1]}</a>!', parse_mode='HTML')
+        await message.reply('У цьому чаті ще немає зареєстрованих пупсіків😢')
 
 
 @dp.message(Command('baby_stats'))
@@ -200,7 +209,11 @@ async def cmd_baby_stats(message: Message) -> None:
     if data:
         s = 'Статистика Пупсиків дня:\n'
         for index, user_info in enumerate(data):
-            row = f'{index+1}) {user_info[0]} - {user_info[1]}\n'
+            if user_info[1]:
+                row = f'{index+1}) {user_info[1]} - {user_info[2]}\n'
+            else:
+                user = await get_user_from_chat(message.chat.id, user_info[0])
+                row = f'{index+1}) {user.full_name} - {user_info[2]}'
             s += row
         await message.reply(s)
     else:
@@ -212,13 +225,14 @@ async def cmd_all(message: Message) -> None:
     if message.chat.type == 'private':
         await message.reply('Цю команду можна використати тільки в групі 🧌')
         return
-    data = get_stats(message.chat.id)
+    data = get_ids(message.chat.id)
     if data:
         await message.answer('Пупсики, всі сюди 🤗')
         text = ''
         count = 0
-        for i, user_info in enumerate(data):
-            text += f'@{user_info[0]}\n'
+        for i, user_id in enumerate(data):
+            user = await get_user_from_chat(message.chat.id, user_id)
+            text += f'{get_tag(user)}\n'
             count += 1
             if count == 5:
                 count = 0
@@ -276,7 +290,7 @@ async def cmd_numbers_guess(message: Message) -> None:
     await asyncio.sleep(1.5)
 
     str_opponent_id = get_opponent_id(chat_id, user.id)
-    opponent = (await bot.get_chat_member(chat_id, int(str_opponent_id))).user
+    opponent = await get_user_from_chat(chat_id, int(str_opponent_id))
 
     opponent_link = get_link(opponent)
     user_link = get_link(user)
@@ -360,7 +374,7 @@ async def callback_join_game(callback: CallbackQuery) -> None:
     is_successful, msg = join_to_game(chat_id, joiner.id, creator_id)
 
     if is_successful:
-        creator = (await callback.bot.get_chat_member(chat_id, creator_id)).user
+        creator = await get_user_from_chat(chat_id, creator_id)
         creator_tag = get_tag(creator)
         joiner_tag = get_tag(joiner)
 
