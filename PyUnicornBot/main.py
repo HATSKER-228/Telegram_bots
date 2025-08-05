@@ -213,7 +213,7 @@ async def cmd_baby_stats(message: Message) -> None:
                 row = f'{index+1}) {user_info[1]} - {user_info[2]}\n'
             else:
                 user = await get_user_from_chat(message.chat.id, user_info[0])
-                row = f'{index+1}) {user.full_name} - {user_info[2]} (додай юзернейм будь ласка🙏)'
+                row = f'{index+1}) {user.full_name} - {user_info[2]} (додай юзернейм будь ласка🙏)\n'
             s += row
         await message.reply(s)
     else:
