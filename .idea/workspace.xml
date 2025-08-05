@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="baby_unreg update">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyUnicornBot/baby_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/baby_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyUnicornBot/data_baby.json" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/data_baby.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyUnicornBot/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/main.py" afterDir="false" />
-    </list>
+    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fix daily baby (user with no username issue)" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,7 +53,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.Bot.executor": "Debug",
+    "Python.Bot.executor": "Run",
     "Python.baby_data.executor": "Run",
     "Python.keyboards.executor": "Run",
     "Python.main.executor": "Run",
@@ -297,7 +292,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754311837881</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="fix daily baby (user with no username issue)">
+      <option name="closed" value="true" />
+      <created>1754421580118</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1754421580118</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -330,6 +333,7 @@
     <MESSAGE value="random number button" />
     <MESSAGE value="/all command" />
     <MESSAGE value="baby_unreg update" />
-    <option name="LAST_COMMIT_MESSAGE" value="baby_unreg update" />
+    <MESSAGE value="fix daily baby (user with no username issue)" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix daily baby (user with no username issue)" />
   </component>
 </project>

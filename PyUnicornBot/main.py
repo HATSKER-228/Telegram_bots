@@ -70,7 +70,7 @@ def determinate_lang(text: str) -> str:
     return 'eng'
 
 
-bot = Bot(token='8159707276:AAF3y1TcSU_xzSSJF51qdkak-yK7BPCR198')
+bot = Bot(token=os.environ.get('TOKEN'))
 dp = Dispatcher()
 
 
