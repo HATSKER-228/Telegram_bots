@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fix baby stats 12-08-25">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fix baby stats 17-08-25" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -103,7 +101,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-03e874896e21-d902c0275401-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-252.23892.439" />
+        <option value="bundled-python-sdk-d9fa9deec7cb-d902c0275401-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-252.23892.515" />
       </set>
     </attachedChunks>
   </component>
@@ -334,7 +332,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755001748802</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="fix baby stats 17-08-25">
+      <option name="closed" value="true" />
+      <created>1755449805556</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1755449805556</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -370,6 +376,7 @@
     <MESSAGE value="fix daily baby (user with no username issue)" />
     <MESSAGE value="fix daily baby (user with no username issue) 2" />
     <MESSAGE value="fix baby stats 12-08-25" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix baby stats 12-08-25" />
+    <MESSAGE value="fix baby stats 17-08-25" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix baby stats 17-08-25" />
   </component>
 </project>
