@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fix baby stats 18-08-25">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fix baby stats 26-08-25" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -350,7 +348,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755540834446</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="fix baby stats 26-08-25">
+      <option name="closed" value="true" />
+      <created>1756210043065</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1756210043065</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -388,6 +394,7 @@
     <MESSAGE value="fix baby stats 12-08-25" />
     <MESSAGE value="fix baby stats 17-08-25" />
     <MESSAGE value="fix baby stats 18-08-25" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix baby stats 18-08-25" />
+    <MESSAGE value="fix baby stats 26-08-25" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix baby stats 26-08-25" />
   </component>
 </project>
