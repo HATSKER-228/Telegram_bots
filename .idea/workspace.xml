@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fix baby stats 13-09-25">
+    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fix baby stats 17-09-25">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -398,7 +398,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757782069798</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="fix baby stats 17-09-25">
+      <option name="closed" value="true" />
+      <created>1758124023250</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1758124023250</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -416,7 +424,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/.." />
     </ignored-roots>
-    <MESSAGE value="scalingo commit" />
     <MESSAGE value="commit" />
     <MESSAGE value="secure commit(maybe)" />
     <MESSAGE value="aiogram" />
@@ -441,6 +448,7 @@
     <MESSAGE value="fix baby stats 03-09-25" />
     <MESSAGE value="fix baby stats 07-09-25" />
     <MESSAGE value="fix baby stats 13-09-25" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix baby stats 13-09-25" />
+    <MESSAGE value="fix baby stats 17-09-25" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix baby stats 17-09-25" />
   </component>
 </project>
