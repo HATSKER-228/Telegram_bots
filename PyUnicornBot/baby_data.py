@@ -2,7 +2,6 @@ import json
 import os
 from random import choice
 from datetime import date
-
 FILE_PATH: str = 'PyUnicornBot/data_baby.json'
 
 
@@ -89,16 +88,6 @@ def get_stats(chat_id: int) -> list | None:
         user_info: dict = data[str_chat_id]['players'][str_user_id]
         stats.append((int(str_user_id), user_info['username'], user_info['count']))
     return sorted(stats, key=lambda x: x[2], reverse=True)
-
-
-def get_ids(chat_id: int) -> list | None:
-    data: dict = load_data()
-    str_chat_id = str(chat_id)
-
-    if str_chat_id not in data or len(data[str_chat_id]['players']) == 0:
-        return None
-
-    return list(map(int, data[str_chat_id]['players'].keys()))
 
 
 def select_baby(chat_id: int) -> tuple[bool, int | None]:

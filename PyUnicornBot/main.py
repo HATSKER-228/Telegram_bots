@@ -7,7 +7,7 @@ from aiogram import F
 import shutil
 import os
 from random import randint
-from baby_data import register_user, unregister_user, get_stats, select_baby, get_path, is_in_list, get_ids
+from baby_data import register_user, unregister_user, get_stats, select_baby, get_path, is_in_list
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
 from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
 from keyboards import kb_join_game, kb_random_num, kb_submit_baby_unreg
@@ -218,29 +218,6 @@ async def cmd_baby_stats(message: Message) -> None:
         await message.reply(s)
     else:
         await message.reply('У цьому чаті ще немає зареєстрованих Пупсіків 😢')
-
-
-@dp.message(Command('all'))
-async def cmd_all(message: Message) -> None:
-    if message.chat.type == 'private':
-        await message.reply('Цю команду можна використати тільки в групі 🧌')
-        return
-    data = get_ids(message.chat.id)
-    if data:
-        await message.answer('Пупсики, всі сюди 🤗')
-        text = ''
-        count = 0
-        for i, user_id in enumerate(data):
-            user = await get_user_from_chat(message.chat.id, user_id)
-            text += f'{get_tag(user)}\n'
-            count += 1
-            if count == 5:
-                count = 0
-                await message.answer(text, parse_mode='HTML')
-                text = ''
-        await message.answer(text, parse_mode='HTML')
-    else:
-        await message.reply('У цьому чаті немає зареєстрованих Пупсиків, яких я міг би покликати 😢')
 
 
 @dp.message(Command('create'))

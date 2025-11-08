@@ -4,8 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fix baby stats 01-10-25">
+    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fix baby stats 28-10-25">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/baby_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/baby_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/data_baby.json" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/data_baby.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,21 +55,21 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.Bot.executor&quot;: &quot;Run&quot;,
-    &quot;Python.baby_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.keyboards.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.numbers_tools.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/coding/python/Telegram_bots&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.Bot.executor": "Run",
+    "Python.baby_data.executor": "Run",
+    "Python.keyboards.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.numbers_tools.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "D:/coding/python/Telegram_bots",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\coding\Python\Telegram_bots\PyUnicornBot" />
@@ -103,7 +106,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-1bde30d8e611-7b97d883f26b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.25557.130" />
+        <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
       </set>
     </attachedChunks>
   </component>
@@ -438,7 +441,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759331592006</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="fix baby stats 28-10-25">
+      <option name="closed" value="true" />
+      <created>1761663817253</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1761663817253</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -456,7 +467,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/.." />
     </ignored-roots>
-    <MESSAGE value="numbers update" />
     <MESSAGE value="statistics recovery" />
     <MESSAGE value="statistics recovery 2.0" />
     <MESSAGE value="real recovery statistics" />
@@ -481,6 +491,7 @@
     <MESSAGE value="fix baby stats 26-09-25" />
     <MESSAGE value="fix baby stats 28-09-25" />
     <MESSAGE value="fix baby stats 01-10-25" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix baby stats 01-10-25" />
+    <MESSAGE value="fix baby stats 28-10-25" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix baby stats 28-10-25" />
   </component>
 </project>
