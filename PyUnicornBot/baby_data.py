@@ -4,7 +4,6 @@ from random import choice
 from datetime import date
 FILE_PATH: str = 'PyUnicornBot/data_baby.json'
 
-
 def get_path() -> str:
     return FILE_PATH
 
@@ -78,7 +77,7 @@ def unregister_user(chat_id: int, user_id: int) -> bool:
 
 def get_stats(chat_id: int) -> list | None:
     data: dict = load_data()
-    str_chat_id = str(chat_id)
+    str_chat_id: str = str(chat_id)
 
     if str_chat_id not in data or len(data[str_chat_id]['players']) == 0:
         return None
