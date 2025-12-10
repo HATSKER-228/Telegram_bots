@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fixing 20-11-25">
+    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fixing 22-11-25">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -487,7 +487,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763659087522</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="fixing 22-11-25">
+      <option name="closed" value="true" />
+      <created>1763839306517</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1763839306517</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -505,7 +513,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/.." />
     </ignored-roots>
-    <MESSAGE value="random number button" />
     <MESSAGE value="/all command" />
     <MESSAGE value="baby_unreg update" />
     <MESSAGE value="fix daily baby (user with no username issue)" />
@@ -530,7 +537,8 @@
     <MESSAGE value="fixing 15-11-25" />
     <MESSAGE value="fixing 16-11-25" />
     <MESSAGE value="fixing 20-11-25" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixing 20-11-25" />
+    <MESSAGE value="fixing 22-11-25" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing 22-11-25" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
