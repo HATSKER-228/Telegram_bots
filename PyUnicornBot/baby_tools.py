@@ -24,7 +24,7 @@ def save_data(data: dict) -> None:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-def register_user(chat_id: int, user_id: int, username: str | None) -> bool:
+def register_user(chat_id: int, user_id: int) -> bool:
     data: dict = load_data()
     str_chat_id = str(chat_id)
     str_user_id = str(user_id)
@@ -33,10 +33,7 @@ def register_user(chat_id: int, user_id: int, username: str | None) -> bool:
         data[str_chat_id] = {'players': {}, 'last_play': None, 'last_winner': None}
 
     if str_user_id not in data[str_chat_id]['players']:
-        data[str_chat_id]['players'][str_user_id] = {
-            'username': username,
-            'count': 0
-        }
+        data[str_chat_id]['players'][str_user_id] = 0
         save_data(data)
         return True
     else:
@@ -84,9 +81,8 @@ def get_stats(chat_id: int) -> list | None:
 
     stats = list()
     for str_user_id in data[str_chat_id]['players'].keys():
-        user_info: dict = data[str_chat_id]['players'][str_user_id]
-        stats.append((int(str_user_id), user_info['username'], user_info['count']))
-    return sorted(stats, key=lambda x: x[2], reverse=True)
+        stats.append((int(str_user_id), data[str_chat_id]['players'][str_user_id]))
+    return sorted(stats, key=lambda x: x[1], reverse=True)
 
 
 def select_baby(chat_id: int) -> tuple[bool, int | None]:
@@ -103,7 +99,7 @@ def select_baby(chat_id: int) -> tuple[bool, int | None]:
 
     players: dict = data[str_chat_id]['players']
     winner_id: str = choice(list(players.keys()))
-    players[winner_id]['count'] += 1
+    players[winner_id] += 1
 
     data[str_chat_id]['last_play'] = today
     data[str_chat_id]['last_winner'] = int(winner_id)

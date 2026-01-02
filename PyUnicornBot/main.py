@@ -2,14 +2,15 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ChatType
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, User, FSInputFile
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram import F
 import shutil
 import os
 from random import randint
-from baby_data import register_user, unregister_user, get_stats, select_baby, get_path, is_in_list
+from baby_tools import register_user, unregister_user, get_stats, select_baby, get_path, is_in_list
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
 from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
+from user_tools import get_user_tag, get_user_link, get_username, UserUpdateMiddleware
 from keyboards import kb_join_game, kb_random_num, kb_submit_baby_unreg
 from keep_alive import keep_alive
 keep_alive()
@@ -24,18 +25,6 @@ QWERTY_TO_YTSUKEN: dict = {
     '/': '.', '?': ','
 }
 YTSUKEN_TO_QWERTY: dict = dict([(value, key) for key, value in QWERTY_TO_YTSUKEN.items()])
-
-
-def get_tag(user: User) -> str:
-    return f'@{user.username}' if user.username else f'<a href="tg://user?id={user.id}">{user.full_name}</a>'
-
-
-def get_link(user: User) -> str:
-    return f'<a href="tg://user?id={user.id}">{user.full_name}</a>'
-
-
-async def get_user_from_chat(chat_id: int, user_id: int) -> User:
-    return (await bot.get_chat_member(chat_id, user_id)).user
 
 
 def fix_qwerty(s: str) -> str:
@@ -72,7 +61,7 @@ def determinate_lang(text: str) -> str:
 
 bot = Bot(token=os.environ.get('TOKEN'))
 dp = Dispatcher()
-
+dp.update.middleware(UserUpdateMiddleware())
 
 @dp.message(Command('start'), F.chat.type == ChatType.PRIVATE)
 async def cmd_start_private(message: Message) -> None:
@@ -153,6 +142,31 @@ async def cmd_rules(message: Message) -> None:
     await message.answer(text, parse_mode='HTML')
 
 
+@dp.message(Command('updates'))
+async def cmd_updates(message: Message) -> None:
+    text = '''📜 <u><b>Що нового у Unicorn Bot</b></u>
+<b>01.03.2026</b>
+<i>Команда /updates</i>
+• Тут будуть описані усі зміни та оновлення цього боту
+
+<i>Підтримка даних користувачів</i>
+• Від тепер ваші ім'я та юзернейм будуть збережені окремо
+• Оновлюватимуться регулярно (кожну добу)
+• Це потрібно для оптимізації роботи та зручності використання
+
+<u><b>Попередні оновлення:</b></u>
+08.11.2025 - видалення команди /all
+04.08.2025 - оновлення команди /baby_unreg
+01.08.2025 - додання команди /all
+28.07.2025 - додання кнопки "Рандомне число" у грі "Числа"
+27.07.2025 - додання команд /rules, /shypko, а також показ числа переможця у грі "Числа"
+26.07.2025 - додання гри "Числа"
+18.07.2025 - додання Пупсиків дня
+18.07.2025 - перехід на бібліоткеу aiogram
+'''
+    await message.answer(text, parse_mode='HTML')
+
+
 @dp.message(Command('baby_reg'))
 async def cmd_baby_reg(message: Message) -> None:
     if message.chat.type == 'private':
@@ -160,9 +174,9 @@ async def cmd_baby_reg(message: Message) -> None:
         return
     user = message.from_user
 
-    added = register_user(message.chat.id, user.id, user.username)
+    added = register_user(message.chat.id, user.id)
     if added:
-        await message.reply(f'{get_tag(user)} тепер у списку пупсиків! 🐣', parse_mode='HTML')
+        await message.reply(f'{get_user_tag(user.id)} тепер у списку пупсиків! 🐣', parse_mode='HTML')
     else:
         await message.reply('Ти вже зареєстрований як пупсик 😘')
 
@@ -172,14 +186,14 @@ async def cmd_baby_unreg(message: Message) -> None:
     if message.chat.type == 'private':
         await message.reply('Цю команду можна використати тільки в групі 🧌')
         return
-    user = message.from_user
-    in_list = is_in_list(message.chat.id, user.id)
+    user_id = message.from_user.id
+    in_list = is_in_list(message.chat.id, user_id)
     if not in_list:
-        await message.reply(f'{get_tag(user)} не було в списку пупсиків. Варто приєднатися!', parse_mode='HTML')
+        await message.reply(f'Тебе не було в списку пупсиків. Варто приєднатися!')
         return
 
-    kb = kb_submit_baby_unreg(message.chat.id, user.id)
-    await message.answer(f'{get_link(user)}, ти точно хочеш вийти зі списку Пупсиків?', parse_mode='HTML', reply_markup=kb)
+    kb = kb_submit_baby_unreg(message.chat.id, user_id)
+    await message.answer(f'{get_user_link(user_id)}, ти точно хочеш вийти зі списку Пупсиків?', parse_mode='HTML', reply_markup=kb)
     await message.delete()
 
 
@@ -191,11 +205,9 @@ async def cmd_baby_select(message: Message) -> None:
     chat_id: int = message.chat.id
     is_successful, baby_id = select_baby(chat_id)
     if is_successful:
-        baby = await get_user_from_chat(chat_id, baby_id)
-        await message.answer(f'🎉 Пупсик дня — {get_tag(baby)}!', parse_mode='HTML')
+        await message.answer(f'🎉 Пупсик дня — {get_user_tag(baby_id)}!', parse_mode='HTML')
     elif baby_id:
-        baby = await get_user_from_chat(chat_id, baby_id)
-        await message.reply(f'Сьогоднішній пупсік уже обраний: {get_tag(baby)}💖', parse_mode='HTML')
+        await message.reply(f'Сьогоднішній пупсік уже обраний: {get_user_tag(baby_id)}💖', parse_mode='HTML')
     else:
         await message.reply('У цьому чаті ще немає зареєстрованих пупсіків😢')
 
@@ -208,13 +220,8 @@ async def cmd_baby_stats(message: Message) -> None:
     data = get_stats(message.chat.id)
     if data:
         s = 'Статистика Пупсиків дня:\n'
-        for index, user_info in enumerate(data):
-            if user_info[1]:
-                row = f'{index+1}) {user_info[1]} - {user_info[2]}\n'
-            else:
-                user = await get_user_from_chat(message.chat.id, user_info[0])
-                row = f'{index+1}) {user.full_name} - {user_info[2]} (додай юзернейм будь ласка🙏)\n'
-            s += row
+        for index, (user_id, count) in enumerate(data):
+            s += f'{index+1}) {get_username(user_id)} - {count}\n'
         await message.reply(s)
     else:
         await message.reply('У цьому чаті ще немає зареєстрованих Пупсіків 😢')
@@ -231,7 +238,7 @@ async def cmd_numbers_create_game(message: Message) -> None:
 
     is_successful = create_game(chat_id, user_id)
     if is_successful:
-        await message.reply(f'🔢{get_link(message.from_user)} хоче зіграти в Числа!\nТикайте кнопку нижче👇',
+        await message.reply(f'🔢{get_user_link(user_id)} хоче зіграти в Числа!\nТикайте кнопку нижче👇',
                             reply_markup=kb_join_game(chat_id, user_id), parse_mode='HTML')
     else:
         await message.reply('У цьому чаті вже створена гра.')
@@ -254,10 +261,10 @@ async def cmd_numbers_guess(message: Message) -> None:
         return
 
     chat_id = message.chat.id
-    user = message.from_user
+    user_id = message.from_user.id
 
     _, *text = message.text.strip().split()
-    is_successful, reply = guess_number(chat_id, user.id, text)
+    is_successful, reply = guess_number(chat_id, user_id, text)
 
     if not is_successful:
         await message.reply(reply)
@@ -266,20 +273,19 @@ async def cmd_numbers_guess(message: Message) -> None:
     await message.reply(reply)
     await asyncio.sleep(1.5)
 
-    str_opponent_id = get_opponent_id(chat_id, user.id)
-    opponent = await get_user_from_chat(chat_id, int(str_opponent_id))
+    opponent_id = int(get_opponent_id(chat_id, user_id))
 
-    opponent_link = get_link(opponent)
-    user_link = get_link(user)
+    opponent_link = get_user_link(opponent_id)
+    user_link = get_user_link(user_id)
 
-    user_guesses = get_guesses(chat_id, user.id)
-    opponent_guesses = get_guesses(chat_id, opponent.id)
+    user_guesses = get_guesses(chat_id, user_id)
+    opponent_guesses = get_guesses(chat_id, opponent_id)
 
     user_attempts = user_guesses.count('\n')
     opponent_attempts = opponent_guesses.count('\n')
 
-    user_finished = get_user_finished(chat_id, user.id)
-    opponent_finished = get_user_finished(chat_id, opponent.id)
+    user_finished = get_user_finished(chat_id, user_id)
+    opponent_finished = get_user_finished(chat_id, opponent_id)
 
     if user_attempts == opponent_attempts:
         if user_finished:
@@ -307,7 +313,7 @@ async def cmd_numbers_guess(message: Message) -> None:
                 ending = 'и'
             await message.answer(
                 f'🥳🎉 ПЕРЕМОГА!\n{user_link} вгадав(-ла) число за {user_attempts} спроб{ending}.\n'
-                f'Його/Її число було: {get_number(chat_id, user.id)}', parse_mode='HTML')
+                f'Його/Її число було: {get_number(chat_id, user_id)}', parse_mode='HTML')
             delete_game(chat_id)
 
         case 'opponent win':
@@ -317,7 +323,7 @@ async def cmd_numbers_guess(message: Message) -> None:
             elif 2 <= opponent_attempts <= 4:
                 ending = 'и'
             await message.answer(f'🥳🎉 ПЕРЕМОГА!\n{opponent_link} вгадав(-ла) число за {opponent_attempts} спроб{ending}.\n'
-                                 f'Його/Її число було: {get_number(chat_id, opponent.id)}', parse_mode='HTML')
+                                 f'Його/Її число було: {get_number(chat_id, opponent_id)}', parse_mode='HTML')
             delete_game(chat_id)
 
         case 'draw':
@@ -346,14 +352,13 @@ async def callback_join_game(callback: CallbackQuery) -> None:
     _, str_chat_id, str_creator_id = callback.data.split('/')
     chat_id = int(str_chat_id)
     creator_id = int(str_creator_id)
-    joiner = callback.from_user
+    joiner_id = callback.from_user.id
 
-    is_successful, msg = join_to_game(chat_id, joiner.id, creator_id)
+    is_successful, msg = join_to_game(chat_id, joiner_id, creator_id)
 
     if is_successful:
-        creator = await get_user_from_chat(chat_id, creator_id)
-        creator_tag = get_tag(creator)
-        joiner_tag = get_tag(joiner)
+        creator_tag = get_user_tag(creator_id)
+        joiner_tag = get_user_tag(joiner_id)
 
         text = f'🟢Опонент знайшовся!\n{creator_tag} та {joiner_tag} надішліть свої числа мені в особисті повідомлення🤗'
         await callback.message.answer(text=text, parse_mode='HTML')
@@ -368,8 +373,8 @@ async def callback_join_game(callback: CallbackQuery) -> None:
             '📩 Просто надішли число без додаткових символів.\n\n'
             'Або тикай кнопку нижче, щоб я сам обрав для тебе число👇'
         )
-        await callback.bot.send_message(creator.id, instructions, reply_markup=kb_random_num())
-        await callback.bot.send_message(joiner.id, instructions, reply_markup=kb_random_num())
+        await callback.bot.send_message(creator_id, instructions, reply_markup=kb_random_num())
+        await callback.bot.send_message(joiner_id, instructions, reply_markup=kb_random_num())
     else:
         await callback.answer(text=msg, show_alert=True)
 
@@ -392,9 +397,9 @@ async def callback_gen_random_num(callback: CallbackQuery) -> None:
 @dp.callback_query(F.data.startswith('baby_unreg'))
 async def callback_baby_unreg(callback: CallbackQuery) -> None:
     _, action, str_chat_id, str_creator_id = callback.data.split('/')
-    user = callback.from_user
+    user_id = callback.from_user.id
 
-    if user.id != int(str_creator_id):
+    if user_id != int(str_creator_id):
         await callback.answer(text='Ці кнопки не для тебе🧌', show_alert=True)
         return
     if action == 'decline':
@@ -404,7 +409,7 @@ async def callback_baby_unreg(callback: CallbackQuery) -> None:
     deleted = unregister_user(int(str_chat_id), int(str_creator_id))
     if deleted:
         await callback.answer('Тебе було виключино з Пупсиків😢', show_alert=True)
-        await callback.message.answer(f'{get_link(user)} покинув список Пупсиків😭', parse_mode='HTML')
+        await callback.message.answer(f'{get_user_link(user_id)} покинув список Пупсиків😭', parse_mode='HTML')
         await callback.message.delete()
     else:
         await callback.answer(text='Тебе не було в списку пупсиків. Варто приєднатися!', show_alert=True)
@@ -444,11 +449,10 @@ async def set_number(message: Message) -> None:
     await message.answer(reply)
 
     if success and group_id is not None and first_player_id is not None:
-        first_player = (await bot.get_chat_member(group_id, first_player_id)).user
         await message.bot.send_message(group_id, '🎯 Обидва гравці надіслали числа! Починаймо гру!')
-        await message.bot.send_message(group_id, f'🟢Черга {get_link(first_player)}\n'
+        await message.bot.send_message(group_id, f'🟢Черга {get_user_link(first_player_id)}\n'
                                                  f'📩Надсилай спробу через команду /guess [твоя_здогадка]',
-                                       parse_mode='HTML')
+                                                 parse_mode='HTML')
 
 
 async def main() -> None:
