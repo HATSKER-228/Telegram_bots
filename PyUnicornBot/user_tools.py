@@ -10,7 +10,6 @@ UPDATE_INTERVAL: int = 24 * 60 * 60 # 1 day
 
 class UserUpdateMiddleware(BaseMiddleware):
     async def __call__(self, handler, event, data):
-        print('/')
         user = None
 
         if event.message:
