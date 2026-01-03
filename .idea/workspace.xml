@@ -4,12 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="fixing 04-12-25">
-      <change afterPath="$PROJECT_DIR$/PyUnicornBot/user_tools.py" afterDir="false" />
+    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="saving users' data, /updates command">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyUnicornBot/baby_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/baby_tools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyUnicornBot/data_baby.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/baby_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/baby_tools.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PyUnicornBot/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/user_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/user_tools.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,23 +55,23 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.Bot.executor": "Run",
-    "Python.baby_data.executor": "Debug",
-    "Python.keyboards.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.numbers_tools.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "D:/coding/python/Telegram_bots",
-    "settings.editor.selected.configurable": "settings.json.schema"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.Bot.executor&quot;: &quot;Run&quot;,
+    &quot;Python.baby_data.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.keyboards.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.numbers_tools.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/coding/python/Telegram_bots&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.json.schema&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\coding\Python\Telegram_bots\PyUnicornBot" />
@@ -508,7 +507,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765394546389</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="saving users' data, /updates command">
+      <option name="closed" value="true" />
+      <created>1767396515354</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1767396515354</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -526,7 +533,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/.." />
     </ignored-roots>
-    <MESSAGE value="baby_unreg update" />
     <MESSAGE value="fix daily baby (user with no username issue)" />
     <MESSAGE value="fix daily baby (user with no username issue) 2" />
     <MESSAGE value="fix baby stats 12-08-25" />
@@ -551,6 +557,7 @@
     <MESSAGE value="fixing 20-11-25" />
     <MESSAGE value="fixing 22-11-25" />
     <MESSAGE value="fixing 04-12-25" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixing 04-12-25" />
+    <MESSAGE value="saving users' data, /updates command" />
+    <option name="LAST_COMMIT_MESSAGE" value="saving users' data, /updates command" />
   </component>
 </project>

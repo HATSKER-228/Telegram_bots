@@ -2,10 +2,8 @@ import json
 import os
 from random import choice
 from datetime import date
-FILE_PATH: str = 'PyUnicornBot/data_baby.json'
 
-def get_path() -> str:
-    return FILE_PATH
+FILE_PATH: str = 'PyUnicornBot/data_baby.json'
 
 
 def get_today() -> str:

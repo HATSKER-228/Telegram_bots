@@ -7,7 +7,8 @@ from aiogram import F
 import shutil
 import os
 from random import randint
-from baby_tools import register_user, unregister_user, get_stats, select_baby, get_path, is_in_list
+import baby_tools, numbers_tools, user_tools
+from baby_tools import register_user, unregister_user, get_stats, select_baby, is_in_list
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
 from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
 from user_tools import get_user_tag, get_user_link, get_username, UserUpdateMiddleware
@@ -83,6 +84,7 @@ async def cmd_help(message: Message) -> None:
 /fix - виправлю розкладку повідомлення (з qwerty на йцукен, або ж навпаки)
 /shypko - оціню повідомлення від 0 до 10
 /rules - надішлю правила кожної мінігри
+/updates - скажу що нового
 
 <b>!!!Тільки в групі!!!</b>
 <u>Пупсик дня</u>
@@ -90,7 +92,6 @@ async def cmd_help(message: Message) -> None:
 /baby_unreg - видалю тебе з Пупсиків
 /baby_select - оберу Пупсика дня (лише раз в день)
 /baby_stats - надішлю статистику хто скільки разів був Пупсиком дня
-/all - покличу усіх Пупсиків у чат
 
 <u>Гра "Числа"</u>
 /create - створю гру
@@ -133,11 +134,12 @@ async def cmd_rules(message: Message) -> None:
 • Створити гру можна командою /create.
 • Я сам напишу кожному з гравців у приват і попрошу загадати 4-цифрове число з різних цифр.
 • Після цього гравці по черзі надсилають мені здогадки командою, наприклад /guess 1234.
-• Я у відповідь надсилаю підказку:
+• Я у відповідь надсилаю підказку виду ХХО або ж ХХОО:
     X — цифра є і стоїть на правильному місці.
     O — цифра є, але стоїть не там.
+• Розташування символів в підказці не пов'язане з розташуванням цифр у числі опонента.
 • Виграє той, хто першим вгадає число суперника повністю.
-• Якщо хочете зупинити гру — напишіть /cancel.
+• Якщо хочете скасувати гру — напишіть /cancel.
 • В одній групі може бути лише одна активна гра.'''
     await message.answer(text, parse_mode='HTML')
 
@@ -415,10 +417,14 @@ async def callback_baby_unreg(callback: CallbackQuery) -> None:
         await callback.answer(text='Тебе не було в списку пупсиків. Варто приєднатися!', show_alert=True)
 
 
-@dp.message(Command('get_baby_stats'), F.chat.type == 'private', F.from_user.id == 1250738671)
-async def admin_cmd_get_baby_stats(message: Message) -> None:
-    file = FSInputFile(get_path())
-    await message.answer_document(file, caption='Ось файл зі статистикою пупсиків 👶')
+@dp.message(Command('get_jsons'), F.chat.type == 'private', F.from_user.id == 1250738671)
+async def admin_cmd_get_jsons(message: Message) -> None:
+    babies = FSInputFile(baby_tools.FILE_PATH)
+    numbers = FSInputFile(numbers_tools.FILE_PATH)
+    users = FSInputFile(user_tools.FILE_PATH)
+    await message.answer_document(babies)
+    await message.answer_document(numbers)
+    await message.answer_document(users)
 
 
 @dp.message(Command('upload_baby_stats'), F.chat.type == 'private', F.from_user.id == 1250738671)
@@ -434,9 +440,27 @@ async def admin_cmd_upload_baby_stats(message: Message) -> None:
     file = await message.bot.get_file(message.document.file_id)
     await message.bot.download_file(file.file_path, 'temp_uploaded.json')
 
-    shutil.move('temp_uploaded.json', get_path())
+    shutil.move('temp_uploaded.json', baby_tools.FILE_PATH)
 
     await message.answer('Файл зі статистикою успішно оновлено.')
+
+
+@dp.message(Command('upload_users_data'), F.chat.type == 'private', F.from_user.id == 1250738671)
+async def admin_cmd_upload_users_data(message: Message) -> None:
+    if not message.document:
+        await message.answer('Будь ласка, надішли файл як документ.')
+        return
+
+    if not message.document.file_name.endswith('.json'):
+        await message.answer('Це має бути JSON-файл.')
+        return
+
+    file = await message.bot.get_file(message.document.file_id)
+    await message.bot.download_file(file.file_path, 'temp_uploaded.json')
+
+    shutil.move('temp_uploaded.json', user_tools.FILE_PATH)
+
+    await message.answer('Файл успішно оновлено.')
 
 
 @dp.message(F.chat.type == 'private')

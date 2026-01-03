@@ -1,7 +1,7 @@
 import json
 import os
 from time import time
-from aiogram.types import User, Message
+from aiogram.types import User
 from aiogram import BaseMiddleware
 
 FILE_PATH: str = 'PyUnicornBot/data_users.json'
