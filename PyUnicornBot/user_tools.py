@@ -75,31 +75,30 @@ def get_user_tag(user_id: int) -> str:
     data = load_data()
 
     if str_user_id not in data:
-        return f'<a href="tg://user?id={user_id}">unknown user</a>'
+        return f'<a href="tg://user?id={user_id}">unknown user (id: {user_id})</a>'
 
     if username := data[str_user_id].get('username'):
         return f'@{username}'
 
-    return f'<a href="tg://user?id={user_id}">{data[str_user_id].get('full_name', 'unknown user')}</a>'
+    return get_user_link(user_id)
 
 
 def get_user_link(user_id: int) -> str:
-    str_user_id = str(user_id)
-    data = load_data()
-
-    if str_user_id not in data:
-        return f'<a href="tg://user?id={user_id}">unknown user</a>'
-
-    return f'<a href="tg://user?id={user_id}">{data[str_user_id].get('full_name', 'unknown user')}</a>'
+    return f'<a href="tg://user?id={user_id}">{get_user_full_name(user_id)}</a>'
 
 
 def get_username(user_id: int) -> str:
     str_user_id = str(user_id)
     data = load_data()
+
     if str_user_id not in data:
-        return get_user_full_name(user_id)
-    else:
-        return data[str_user_id].get('username', get_user_full_name(user_id))
+        return f'unknown user (id: {user_id})'
+
+    username = data[str_user_id].get('username')
+    if username:
+        return username
+
+    return get_user_full_name(user_id)
 
 
 def get_user_full_name(user_id: int) -> str:
@@ -109,4 +108,8 @@ def get_user_full_name(user_id: int) -> str:
     if str_user_id not in data:
         return f'unknown user (id: {user_id})'
 
-    return data[str_user_id].get('full_name', f'unknown user (id: {user_id})')
+    full_name = data[str_user_id].get('full_name')
+    if full_name:
+        return full_name
+
+    return f'unknown user (id: {user_id})'

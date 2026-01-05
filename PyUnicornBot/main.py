@@ -13,51 +13,9 @@ from numbers_tools import create_game, join_to_game, set_player_number, cancel_g
 from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
 from user_tools import get_user_tag, get_user_link, get_username, UserUpdateMiddleware
 from keyboards import kb_join_game, kb_random_num, kb_submit_baby_unreg
+from fix_layout import determinate_lang, fix_layout, KB_LAYOUTS
 from keep_alive import keep_alive
 keep_alive()
-
-QWERTY_TO_YTSUKEN: dict = {
-    '@': '"', '#': '№', '$': ';', '^': ':', '&': '?',
-    'q': 'й', 'w': 'ц', 'e': 'у', 'r': 'к', 't': 'е', 'y': 'н', 'u': 'г', 'i': 'ш', 'o': 'щ', 'p': 'з', '[': 'х',
-    '{': 'Х', ']': 'ї', '}': 'Ї',
-    'a': 'ф', 's': 'і', 'd': 'в', 'f': 'а', 'g': 'п', 'h': 'р', 'j': 'о', 'k': 'л', 'l': 'д', ';': 'ж', ':': 'Ж',
-    "'": 'є', '"': 'Є',
-    'z': 'я', 'x': 'ч', 'c': 'с', 'v': 'м', 'b': 'и', 'n': 'т', 'm': 'ь', ',': 'б', '<': 'Б', '.': 'ю', '>': 'Ю',
-    '/': '.', '?': ','
-}
-YTSUKEN_TO_QWERTY: dict = dict([(value, key) for key, value in QWERTY_TO_YTSUKEN.items()])
-
-
-def fix_qwerty(s: str) -> str:
-    new: str = ''
-    username = False
-    for char in s:
-        if char == '@':
-            username = True
-        elif char in ' []{};\':",./<>?':
-            username = False
-        if username:
-            new += char
-        else:
-            new_char: str = QWERTY_TO_YTSUKEN.get(char if char in '{[}]:;"\'<,>.' else char.lower(), char)
-            new += new_char.upper() if char.isupper() else new_char
-    return new
-
-
-def fix_ytsuken(s: str) -> str:
-    new: str = ''
-    for char in s:
-        new_char: str = YTSUKEN_TO_QWERTY.get(char if char in 'хХїЇжЖєЄбБюЮ' else char.lower(), char)
-        new += new_char.upper() if char.isupper() else new_char
-    return new
-
-
-def determinate_lang(text: str) -> str:
-    s: set = set(text.lower())
-    ua: set = set('йцукенгшщзфівапролджєячсмитьбю')
-    if len(s.intersection(ua)):
-        return 'ua'
-    return 'eng'
 
 
 bot = Bot(token=os.environ.get('TOKEN'))
@@ -66,14 +24,13 @@ dp.update.middleware(UserUpdateMiddleware())
 
 @dp.message(Command('start'), F.chat.type == ChatType.PRIVATE)
 async def cmd_start_private(message: Message) -> None:
-    await message.answer(
-        'Привіт, пупсику ❤️. Я - Unicorn Bot. Ти можеш побачити, що я вмію робити, надіславши команду /help.')
-
-
-@dp.message(Command('start'), F.chat.type.in_({ChatType.GROUP, ChatType.SUPERGROUP}))
-async def cmd_start_group(message: Message) -> None:
-    await message.answer(
-        'Привіт, пупсики ❤️. Я - Unicorn Bot. Ви можете побачити, що я вмію робити, надіславши команду /help@PyUnicornBot.')
+    if message.chat.type == 'private':
+        text = 'Привіт, пупсику ❤️. Я - Unicorn Bot. Ти можеш побачити, що я вмію робити, надіславши команду /help.'
+    elif message.chat.type in {'group', 'supergroup'}:
+        text = 'Привіт, пупсики ❤️. Я - Unicorn Bot. Ви можете побачити, що я вмію робити, надіславши команду /help@PyUnicornBot.'
+    else:
+        text = 'Цю команду можна використати тільки в групі або в особистих повідомленнях зі мною 🧌'
+    await message.answer(text)
 
 
 @dp.message(Command('help'))
@@ -103,8 +60,12 @@ async def cmd_help(message: Message) -> None:
 async def cmd_fix(message: Message) -> None:
     if message.reply_to_message and message.reply_to_message.text:
         text = message.reply_to_message.text
-        fixed = fix_ytsuken(text) if determinate_lang(text) == 'ua' else fix_qwerty(text)
-        await message.reply_to_message.reply(fixed)
+        entities = message.reply_to_message.entities
+        if determinate_lang(message.reply_to_message.text) == 'ua':
+            fixed = fix_layout(text, entities, KB_LAYOUTS['ytsuken'], KB_LAYOUTS['qwerty'])
+        else:
+            fixed = fix_layout(text, entities, KB_LAYOUTS['qwerty'], KB_LAYOUTS['ytsuken'])
+        await message.reply_to_message.reply(text=fixed, entities=entities)
     else:
         await message.reply('Шановний тупорилий представник виду <i>Homo Sapiens</i>, команду необхідно писати у '
                             'ВІДПОВІДЬ на ТЕКСТОВЕ повідомлення 🧌', parse_mode='HTML')
@@ -147,7 +108,16 @@ async def cmd_rules(message: Message) -> None:
 @dp.message(Command('updates'))
 async def cmd_updates(message: Message) -> None:
     text = '''📜 <u><b>Що нового у Unicorn Bot</b></u>
-<b>01.03.2026</b>
+<b>05.01.2026</b>
+<i>Оновлення команди /fix</i>
+• Тепер я вдаліше можу траслітерувати текст
+• Зберігаю форматування тексту(жирний, курсивний, закреслений тощо)
+• Не чіпаю теги, хештеги, команди, e-mail, посилання, цитати та блоки коду.
+
+<i>Оновлена підтримка даних користувачів</i>
+• Виправлення багу пов'язаного з виведенням "None", якшо не вказано юзернейм.
+    
+<b>03.01.2026</b>
 <i>Команда /updates</i>
 • Тут будуть описані усі зміни та оновлення цього боту
 
