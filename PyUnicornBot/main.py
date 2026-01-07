@@ -17,7 +17,8 @@ from keep_alive import keep_alive
 keep_alive()
 
 
-bot = Bot(token=os.environ.get('TOKEN'))
+# bot = Bot(token=os.environ.get('TOKEN'))
+bot = Bot(token='8159707276:AAE8K6Hih80QGR5ELoZ9FLgrH4tyrpWf6MU')
 dp = Dispatcher()
 dp.update.middleware(UserUpdateMiddleware())
 dp.message.middleware(GroupOnlyCmdMiddleware())

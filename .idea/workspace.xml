@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="remake guessing numbers, middlewares" />
+    <list default="true" id="020e093c-cb6b-4f8c-af44-3aa8d3f61229" name="Changes" comment="middleware for group only and reply only commands">
+      <change afterPath="$PROJECT_DIR$/PyUnicornBot/middlewares.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/data_baby.json" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/data_baby.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/data_users.json" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/data_users.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/numbers_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/numbers_tools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PyUnicornBot/user_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/PyUnicornBot/user_tools.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -122,6 +130,14 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1750798224537</updated>
+    </task>
+    <task id="LOCAL-00004" summary="test commit">
+      <option name="closed" value="true" />
+      <created>1750800084961</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1750800084961</updated>
     </task>
     <task id="LOCAL-00005" summary="test commit">
       <option name="closed" value="true" />
@@ -507,15 +523,7 @@
       <option name="project" value="LOCAL" />
       <updated>1767647930139</updated>
     </task>
-    <task id="LOCAL-00053" summary="remake guessing numbers, middlewares">
-      <option name="closed" value="true" />
-      <created>1767798896713</created>
-      <option name="number" value="00053" />
-      <option name="presentableId" value="LOCAL-00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1767798896716</updated>
-    </task>
-    <option name="localTasksCounter" value="54" />
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -533,6 +541,7 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/.." />
     </ignored-roots>
+    <MESSAGE value="fix baby stats 17-08-25" />
     <MESSAGE value="fix baby stats 18-08-25" />
     <MESSAGE value="fix baby stats 26-08-25" />
     <MESSAGE value="fix baby stats 30-08-25" />
@@ -557,7 +566,6 @@
     <MESSAGE value="bug fix 01-03-26" />
     <MESSAGE value="msg entities detecting, user_tools.py fix" />
     <MESSAGE value="middleware for group only and reply only commands" />
-    <MESSAGE value="remake guessing numbers, middlewares" />
-    <option name="LAST_COMMIT_MESSAGE" value="remake guessing numbers, middlewares" />
+    <option name="LAST_COMMIT_MESSAGE" value="middleware for group only and reply only commands" />
   </component>
 </project>
