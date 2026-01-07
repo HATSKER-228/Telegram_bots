@@ -173,7 +173,7 @@ def get_user_finished(chat_id: int, user_id: int) -> bool:
     return data[str(chat_id)]['players'][str(user_id)]['finished']
 
 
-def guess_number(chat_id: int, user_id: int, text: list) -> tuple[bool, str]:
+def guess_number(chat_id: int, user_id: int, number: str) -> tuple[bool, str]:
     str_chat_id = str(chat_id)
     str_user_id = str(user_id)
     data = load_data()
@@ -193,21 +193,17 @@ def guess_number(chat_id: int, user_id: int, text: list) -> tuple[bool, str]:
         return False, '️⚠️ Опонент ще не приєднався.'
     if data[str_chat_id]['turn'] != user_id:
         return False, '❌ Зараз не твоя черга.'
+    if number[0] == '0':
+        return False, '❌ Число не повинно починатися з 0.'
+    if len(set(number)) != 4:
+        return False, '❌ Усі цифри мають бути різними.'
 
-    if len(text) == 1 and text[0].isdigit() and len(text[0]) == 4:
-        number_str = text[0]
-        if number_str[0] == '0':
-            return False, '❌ Число не повинно починатися з 0.'
-        if len(set(number_str)) != 4:
-            return False, '❌ Усі цифри мають бути різними.'
+    target = data[str_chat_id]['players'][str_opponent_id]['number']
+    clue = get_clue(number, str(target))
+    data[str_chat_id]['players'][str_user_id]['guesses'].append((number, clue))
+    if int(number) == target:
+        data[str_chat_id]['players'][str_user_id]['finished'] = True
+    data[str_chat_id]['turn'] = int(str_opponent_id)
+    save_data(data)
 
-        target = data[str_chat_id]['players'][str_opponent_id]['number']
-        clue = get_clue(number_str, str(target))
-        data[str_chat_id]['players'][str_user_id]['guesses'].append((number_str, clue))
-        if int(number_str) == target:
-            data[str_chat_id]['players'][str_user_id]['finished'] = True
-        data[str_chat_id]['turn'] = int(str_opponent_id)
-        save_data(data)
-        return True, clue
-
-    return False, '❌ Після команди /guess має бути одне число з рівно 4 цифр.'
+    return True, clue
