@@ -2,25 +2,9 @@ import json
 import os
 from time import time
 from aiogram.types import User
-from aiogram import BaseMiddleware
 
 FILE_PATH: str = 'PyUnicornBot/data_users.json'
 UPDATE_INTERVAL: int = 24 * 60 * 60 # 1 day
-
-
-class UserUpdateMiddleware(BaseMiddleware):
-    async def __call__(self, handler, event, data):
-        user = None
-
-        if event.message:
-            user = event.message.from_user
-        elif event.callback_query:
-            user = event.callback_query.from_user
-
-        if user:
-            update_user(user)
-
-        return await handler(event, data)
 
 
 def load_data() -> dict:

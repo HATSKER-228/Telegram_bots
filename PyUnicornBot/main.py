@@ -1,29 +1,32 @@
 import asyncio
-from aiogram import Bot, Dispatcher
-from aiogram.enums import ChatType
-from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, FSInputFile
-from aiogram import F
 import shutil
 import os
+from aiogram import Bot, Dispatcher, F
+from aiogram.filters import Command
+from aiogram.types import Message, CallbackQuery, FSInputFile, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from random import randint
 import baby_tools, numbers_tools, user_tools
 from baby_tools import register_user, unregister_user, get_stats, select_baby, is_in_list
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
 from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
-from user_tools import get_user_tag, get_user_link, get_username, UserUpdateMiddleware
+from user_tools import get_user_tag, get_user_link, get_username
 from keyboards import kb_join_game, kb_random_num, kb_submit_baby_unreg
 from fix_layout import determinate_lang, fix_layout, KB_LAYOUTS
+from middlewares import UserUpdateMiddleware, GroupOnlyCmdMiddleware, ReplyOnlyCmdMiddleware
 from keep_alive import keep_alive
 keep_alive()
 
 
-bot = Bot(token=os.environ.get('TOKEN'))
+# bot = Bot(token=os.environ.get('TOKEN'))
+bot = Bot(token='8159707276:AAE8K6Hih80QGR5ELoZ9FLgrH4tyrpWf6MU')
 dp = Dispatcher()
 dp.update.middleware(UserUpdateMiddleware())
+dp.message.middleware(GroupOnlyCmdMiddleware())
+dp.message.middleware(ReplyOnlyCmdMiddleware())
 
-@dp.message(Command('start'), F.chat.type == ChatType.PRIVATE)
-async def cmd_start_private(message: Message) -> None:
+
+@dp.message(Command('start'))
+async def cmd_start(message: Message) -> None:
     if message.chat.type == 'private':
         text = 'Привіт, пупсику ❤️. Я - Unicorn Bot. Ти можеш побачити, що я вмію робити, надіславши команду /help.'
     elif message.chat.type in {'group', 'supergroup'}:
@@ -52,13 +55,12 @@ async def cmd_help(message: Message) -> None:
 
 <u>Гра "Числа"</u>
 /create - створю гру
-/guess [число] - надішлю тобі підказку, щоб відгадати число суперника
 /cancel - скасувати гру''', parse_mode='HTML')
 
 
 @dp.message(Command('fix'))
 async def cmd_fix(message: Message) -> None:
-    if message.reply_to_message and message.reply_to_message.text:
+    if message.reply_to_message.text:
         text = message.reply_to_message.text
         entities = message.reply_to_message.entities
         if determinate_lang(message.reply_to_message.text) == 'ua':
@@ -68,16 +70,12 @@ async def cmd_fix(message: Message) -> None:
         await message.reply_to_message.reply(text=fixed, entities=entities)
     else:
         await message.reply('Шановний тупорилий представник виду <i>Homo Sapiens</i>, команду необхідно писати у '
-                            'ВІДПОВІДЬ на ТЕКСТОВЕ повідомлення 🧌', parse_mode='HTML')
+                            'відповідь на ТЕКСТОВЕ повідомлення 🧌', parse_mode='HTML')
 
 
 @dp.message(Command('shypko'))
 async def cmd_shypko(message: Message) -> None:
-    if message.reply_to_message:
-        await message.reply_to_message.reply(f'Я оцінюю це повідомлення на {randint(0, 10)} шипко з 10.')
-    else:
-        await message.reply('Шановний тупорилий представник виду <i>Homo Sapiens</i>, команду необхідно писати у '
-                            'ВІДПОВІДЬ на повідомлення 🧌', parse_mode='HTML')
+    await message.reply_to_message.reply(f'Я оцінюю це повідомлення на {randint(0, 10)} шипко з 10.')
 
 
 @dp.message(Command('rules'))
@@ -94,7 +92,7 @@ async def cmd_rules(message: Message) -> None:
 • Це гра для двох гравців, які мають бути в одній групі.
 • Створити гру можна командою /create.
 • Я сам напишу кожному з гравців у приват і попрошу загадати 4-цифрове число з різних цифр.
-• Після цього гравці по черзі надсилають мені здогадки командою, наприклад /guess 1234.
+• Після цього гравці по черзі надсилають у групу здогадки, написавши @PyUnicornBot.
 • Я у відповідь надсилаю підказку виду ХХО або ж ХХОО:
     X — цифра є і стоїть на правильному місці.
     O — цифра є, але стоїть не там.
@@ -108,6 +106,14 @@ async def cmd_rules(message: Message) -> None:
 @dp.message(Command('updates'))
 async def cmd_updates(message: Message) -> None:
     text = '''📜 <u><b>Що нового у Unicorn Bot</b></u>
+<b>07.01.2026</b>
+<i>Оновлення прийняття спроб у грі "Числа"</i>
+• Відтепер, щоб надіслати здогадку, не потрібно використовувати команду /guess
+• Замість цього треба написати @PyUnicornBot [ваше число]
+• Якшо число відповідає правилам гри, з'явиться кнопка, щоб надіслати здогадку.
+
+<i>Різні виправлення помилок</i>
+
 <b>05.01.2026</b>
 <i>Оновлення команди /fix</i>
 • Тепер я вдаліше можу траслітерувати текст
@@ -141,9 +147,6 @@ async def cmd_updates(message: Message) -> None:
 
 @dp.message(Command('baby_reg'))
 async def cmd_baby_reg(message: Message) -> None:
-    if message.chat.type == 'private':
-        await message.reply('Цю команду можна використати тільки в групі 🧌')
-        return
     user = message.from_user
 
     added = register_user(message.chat.id, user.id)
@@ -155,9 +158,6 @@ async def cmd_baby_reg(message: Message) -> None:
 
 @dp.message(Command('baby_unreg'))
 async def cmd_baby_unreg(message: Message) -> None:
-    if message.chat.type == 'private':
-        await message.reply('Цю команду можна використати тільки в групі 🧌')
-        return
     user_id = message.from_user.id
     in_list = is_in_list(message.chat.id, user_id)
     if not in_list:
@@ -171,9 +171,6 @@ async def cmd_baby_unreg(message: Message) -> None:
 
 @dp.message(Command('baby_select'))
 async def cmd_baby_select(message: Message) -> None:
-    if message.chat.type == 'private':
-        await message.reply('Цю команду можна використати тільки в групі 🧌')
-        return
     chat_id: int = message.chat.id
     is_successful, baby_id = select_baby(chat_id)
     if is_successful:
@@ -186,9 +183,6 @@ async def cmd_baby_select(message: Message) -> None:
 
 @dp.message(Command('baby_stats'))
 async def cmd_baby_stats(message: Message) -> None:
-    if message.chat.type == 'private':
-        await message.reply('Цю команду можна використати тільки в групі 🧌')
-        return
     data = get_stats(message.chat.id)
     if data:
         s = 'Статистика Пупсиків дня:\n'
@@ -201,10 +195,6 @@ async def cmd_baby_stats(message: Message) -> None:
 
 @dp.message(Command('create'))
 async def cmd_numbers_create_game(message: Message) -> None:
-    if message.chat.type == 'private':
-        await message.reply('Цю команду можна використати тільки в групі 🧌')
-        return
-
     chat_id = message.chat.id
     user_id = message.from_user.id
 
@@ -218,25 +208,17 @@ async def cmd_numbers_create_game(message: Message) -> None:
 
 @dp.message(Command('cancel'))
 async def cmd_numbers_cancel(message: Message) -> None:
-    if message.chat.type == 'private':
-        await message.reply('Цю команду можна використати тільки в групі 🧌')
-        return
-
     reply = cancel_game(message.chat.id)
     await message.answer(reply)
 
 
-@dp.message(Command('guess'))
-async def cmd_numbers_guess(message: Message) -> None:
-    if message.chat.type == 'private':
-        await message.reply('Цю команду можна використати тільки в групі 🧌')
-        return
-
+@dp.message(F.via_bot.id == F.bot.id)
+async def numbers_guess(message: Message) -> None:
     chat_id = message.chat.id
     user_id = message.from_user.id
 
-    _, *text = message.text.strip().split()
-    is_successful, reply = guess_number(chat_id, user_id, text)
+    number = message.text.strip()
+    is_successful, reply = guess_number(chat_id, user_id, number)
 
     if not is_successful:
         await message.reply(reply)
@@ -317,6 +299,23 @@ async def cmd_numbers_guess(message: Message) -> None:
             await message.answer(f'🟢Черга {opponent_link}', parse_mode='HTML')
             if opponent_attempts != 0:
                 await message.answer(f'Спроби {opponent_link}:\n' + opponent_guesses, parse_mode='HTML')
+
+
+@dp.inline_query()
+async def inline_guess_number(query: InlineQuery):
+    text = query.query.strip()
+
+    if not text or not text.isdigit() or len(text) != 4:
+        await query.answer(results=[], is_personal=True, cache_time=1)
+        return
+
+    result = InlineQueryResultArticle(
+        id='numbers_guess',
+        title=f'Зробити припущення: {text}',
+        description='Надіслати це число як здогадку',
+        input_message_content=InputTextMessageContent(message_text=text))
+
+    await query.answer(results=[result], is_personal=True, cache_time=1)
 
 
 @dp.callback_query(F.data.startswith('join_game'))
@@ -433,7 +432,7 @@ async def admin_cmd_upload_users_data(message: Message) -> None:
     await message.answer('Файл успішно оновлено.')
 
 
-@dp.message(F.chat.type == 'private')
+@dp.message(F.chat.type == 'private', F.text)
 async def set_number(message: Message) -> None:
     user_id = message.from_user.id
     number_str = message.text.strip()
@@ -445,7 +444,7 @@ async def set_number(message: Message) -> None:
     if success and group_id is not None and first_player_id is not None:
         await message.bot.send_message(group_id, '🎯 Обидва гравці надіслали числа! Починаймо гру!')
         await message.bot.send_message(group_id, f'🟢Черга {get_user_link(first_player_id)}\n'
-                                                 f'📩Надсилай спробу через команду /guess [твоя_здогадка]',
+                                                 f'📩Надсилай здогадку написавши @PyUnicornBot',
                                                  parse_mode='HTML')
 
 
