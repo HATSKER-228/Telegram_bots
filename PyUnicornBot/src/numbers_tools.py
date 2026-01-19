@@ -2,7 +2,7 @@ import json
 import os
 from random import sample
 
-FILE_PATH = 'PyUnicornBot/data_numbers.json'
+FILE_PATH = 'PyUnicornBot/data/data_numbers.json'
 
 def load_data() -> dict:
     if not os.path.exists(FILE_PATH):

@@ -3,7 +3,7 @@ import os
 from time import time
 from aiogram.types import User
 
-FILE_PATH: str = 'PyUnicornBot/data_users.json'
+FILE_PATH: str = 'PyUnicornBot/data/data_users.json'
 UPDATE_INTERVAL: int = 24 * 60 * 60 # 1 day
 
 

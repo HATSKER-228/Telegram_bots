@@ -10,11 +10,9 @@ from baby_tools import register_user, unregister_user, get_stats, select_baby, i
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
 from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
 from user_tools import get_user_tag, get_user_link, get_username
-from keyboards import kb_join_game, kb_random_num, kb_submit_baby_unreg
+from keyboards import kb_join_game, kb_random_num, kb_baby_unreg, kb_go_to_bot_pm
 from fix_layout import determinate_lang, fix_layout, KB_LAYOUTS
 from middlewares import UserUpdateMiddleware, GroupOnlyCmdMiddleware, ReplyOnlyCmdMiddleware
-from keep_alive import keep_alive
-keep_alive()
 
 
 bot = Bot(token=os.environ.get('TOKEN'))
@@ -163,7 +161,7 @@ async def cmd_baby_unreg(message: Message) -> None:
         await message.reply(f'Тебе не було в списку пупсиків. Варто приєднатися!')
         return
 
-    kb = kb_submit_baby_unreg(message.chat.id, user_id)
+    kb = kb_baby_unreg(message.chat.id, user_id)
     await message.answer(f'{get_user_link(user_id)}, ти точно хочеш вийти зі списку Пупсиків?', parse_mode='HTML', reply_markup=kb)
     await message.delete()
 
@@ -331,7 +329,7 @@ async def callback_join_game(callback: CallbackQuery) -> None:
         joiner_tag = get_user_tag(joiner_id)
 
         text = f'🟢Опонент знайшовся!\n{creator_tag} та {joiner_tag} надішліть свої числа мені в особисті повідомлення🤗'
-        await callback.message.answer(text=text, parse_mode='HTML')
+        await callback.message.answer(text=text, parse_mode='HTML', reply_markup=kb_go_to_bot_pm())
         await callback.message.delete()
         await callback.answer()
 

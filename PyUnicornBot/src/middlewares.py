@@ -44,7 +44,7 @@ class ReplyOnlyCmdMiddleware(BaseMiddleware):
             command = data.get('command')
 
             if command and command.command in REPLY_ONLY_CMD:
-                await event.answer('Шановний тупорилий представник виду <i>Homo Sapiens</i>, команду необхідно писати у '
+                await event.answer('Шановний представник виду <i>Homo Sapiens</i>, команду необхідно писати у '
                             'ВІДПОВІДЬ на повідомлення 🧌', parse_mode='HTML')
                 return None
 
