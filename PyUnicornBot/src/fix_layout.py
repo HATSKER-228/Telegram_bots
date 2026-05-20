@@ -5,8 +5,15 @@ KB_LAYOUTS: dict[str, str] = {
     'qwerty': '`1234567890-=qwertyuiop[]\\asdfghjkl;\'zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?',
     'ytsuken': '\'1234567890-=йцукенгшщзхї\фівапролджєячсмитьбю.₴!"№;%:?*()_+ЙЦУКЕНГШЩЗХЇ/ФІВАПРОЛДЖЄЯЧСМИТЬБЮ,'
 }
-PROTECTED_ENTITIES: set[str] = {'mention', 'hashtag', 'cashtag', 'bot_command', 'url', 'email', 'code', 'pre', 'text_link', 'text_mention'}
+PROTECTED_ENTITIES: set[str] = {
+    'mention', 'hashtag', 'cashtag', 'bot_command', 'url',
+    'email', 'code', 'pre', 'text_link', 'text_mention'
+}
 
+KB_LAYOUT_PAIRS: dict[str, str] = {
+    'qwerty': 'ytsuken',
+    'ytsuken': 'qwerty',
+}
 
 def get_utf16_len(s: str) -> int:
     return len(s.encode('utf-16-le')) // 2
@@ -15,8 +22,7 @@ def get_utf16_len(s: str) -> int:
 def map_utf16_to_indexes(text: str) -> list[int]:
     lst = []
     for i, char in enumerate(text):
-        utf16_char_len = get_utf16_len(char)
-        for _ in range(utf16_char_len):
+        for _ in range(get_utf16_len(char)):
             lst.append(i)
     return lst
 
@@ -46,17 +52,12 @@ def fix_layout(text: str, entities: list[MessageEntity], from_layout: str, to_la
             result += char
             continue
         index: int = from_layout.find(char)
-        if index == -1:
-            result += char
-        else:
-            result += to_layout[index]
+        result += char if index == -1 else to_layout[index]
 
     return result
 
 
-def determinate_lang(text: str) -> str:
-    s: set = set(text.lower())
-    ua: set = set('йцукенгшщзфівапролджєячсмитьбю')
-    if len(s.intersection(ua)):
-        return 'ua'
-    return 'eng'
+def detect_layout(text: str) -> str:
+    scores = {name: sum(1 for c in text if c in layout)
+              for name, layout in KB_LAYOUTS.items()}
+    return max(scores, key=scores.get)

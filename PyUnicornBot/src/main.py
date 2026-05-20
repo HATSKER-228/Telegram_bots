@@ -11,7 +11,7 @@ from numbers_tools import create_game, join_to_game, set_player_number, cancel_g
 from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
 from user_tools import get_user_tag, get_user_link, get_username
 from keyboards import kb_join_game, kb_random_num, kb_baby_unreg, kb_go_to_bot_pm
-from fix_layout import determinate_lang, fix_layout, KB_LAYOUTS
+from fix_layout import detect_layout, fix_layout, KB_LAYOUTS, KB_LAYOUT_PAIRS
 from middlewares import UserUpdateMiddleware, GroupOnlyCmdMiddleware, ReplyOnlyCmdMiddleware
 
 
@@ -57,17 +57,20 @@ async def cmd_help(message: Message) -> None:
 
 @dp.message(Command('fix'))
 async def cmd_fix(message: Message) -> None:
-    if message.reply_to_message.text:
-        text = message.reply_to_message.text
-        entities = message.reply_to_message.entities
-        if determinate_lang(message.reply_to_message.text) == 'ua':
-            fixed = fix_layout(text, entities, KB_LAYOUTS['ytsuken'], KB_LAYOUTS['qwerty'])
-        else:
-            fixed = fix_layout(text, entities, KB_LAYOUTS['qwerty'], KB_LAYOUTS['ytsuken'])
-        await message.reply_to_message.reply(text=fixed, entities=entities)
+    replied = message.reply_to_message
+    text = replied.text or replied.caption
+    entities = replied.entities or replied.caption_entities
+
+    if text:
+        src = detect_layout(text)
+        dst = KB_LAYOUT_PAIRS[src]
+        fixed = fix_layout(text, entities, KB_LAYOUTS[src], KB_LAYOUTS[dst])
+
+        await replied.reply(text=fixed, entities=entities)
+        await message.delete()
     else:
         await message.reply('Шановний тупорилий представник виду <i>Homo Sapiens</i>, команду необхідно писати у '
-                            'відповідь на ТЕКСТОВЕ повідомлення 🧌', parse_mode='HTML')
+                            'відповідь на ТЕКСТ 🧌', parse_mode='HTML')
 
 
 @dp.message(Command('shypko'))
@@ -104,6 +107,11 @@ async def cmd_rules(message: Message) -> None:
 async def cmd_updates(message: Message) -> None:
     text = '''📜 <u><b>Що нового у Unicorn Bot</b></u>
 <b>07.01.2026</b>
+<i>Оновлення команди /fix</i>
+• Відтепер, команда /fix може виправляти розкладку не лише текстових повідомлень, а й підписів під фото/відео/файлами.
+• Перероблене розпізнавання мови повідомлення
+   
+<b>07.01.2026</b>
 <i>Оновлення прийняття спроб у грі "Числа"</i>
 • Відтепер, щоб надіслати здогадку, не потрібно використовувати команду /guess
 • Замість цього треба написати @PyUnicornBot [ваше число]
@@ -111,25 +119,9 @@ async def cmd_updates(message: Message) -> None:
 
 <i>Різні виправлення помилок</i>
 
-<b>05.01.2026</b>
-<i>Оновлення команди /fix</i>
-• Тепер я вдаліше можу траслітерувати текст
-• Зберігаю форматування тексту(жирний, курсивний, закреслений тощо)
-• Не чіпаю теги, хештеги, команди, e-mail, посилання, цитати та блоки коду.
-
-<i>Оновлена підтримка даних користувачів</i>
-• Виправлення багу пов'язаного з виведенням "None", якшо не вказано юзернейм.
-    
-<b>03.01.2026</b>
-<i>Команда /updates</i>
-• Тут будуть описані усі зміни та оновлення цього боту
-
-<i>Підтримка даних користувачів</i>
-• Від тепер ваші ім'я та юзернейм будуть збережені окремо
-• Оновлюватимуться регулярно (кожну добу)
-• Це потрібно для оптимізації роботи та зручності використання
-
 <u><b>Попередні оновлення:</b></u>
+05.01.2026 - оновлення команди /fix
+03.01.2026 - додання команди /updates, збереження імен користувачів
 08.11.2025 - видалення команди /all
 04.08.2025 - оновлення команди /baby_unreg
 01.08.2025 - додання команди /all
