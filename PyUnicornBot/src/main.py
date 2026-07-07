@@ -8,7 +8,7 @@ from random import randint
 import baby_tools, numbers_tools, user_tools
 from baby_tools import register_user, unregister_user, get_stats, select_baby, is_in_list
 from numbers_tools import create_game, join_to_game, set_player_number, cancel_game, guess_number, delete_game
-from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num
+from numbers_tools import get_opponent_id, get_guesses, get_user_finished, get_number, get_random_num, is_awaiting_number, cleanup_stale_games
 from user_tools import get_user_tag, get_user_link, get_username
 from keyboards import kb_join_game, kb_random_num, kb_baby_unreg, kb_go_to_bot_pm
 from fix_layout import detect_layout, fix_layout, KB_LAYOUTS, KB_LAYOUT_PAIRS
@@ -40,7 +40,7 @@ async def cmd_help(message: Message) -> None:
 /help - надішлю оце повідомлення
 /fix - виправлю розкладку повідомлення (з qwerty на йцукен, або ж навпаки)
 /shypko - оціню повідомлення від 0 до 10
-/rules - надішлю правила кожної мінігри
+/rules - надішлю правила кожної мініігри
 /updates - скажу що нового
 
 <b>!!!Тільки в групі!!!</b>
@@ -99,19 +99,26 @@ async def cmd_rules(message: Message) -> None:
 • Розташування символів в підказці не пов'язане з розташуванням цифр у числі опонента.
 • Виграє той, хто першим вгадає число суперника повністю.
 • Якщо хочете скасувати гру — напишіть /cancel.
-• В одній групі може бути лише одна активна гра.'''
+• В одній групі може бути лише одна активна гра.
+• Якшо гра не активна більше доби, вона автоматично видаляється'''
     await message.answer(text, parse_mode='HTML')
 
 
 @dp.message(Command('updates'))
 async def cmd_updates(message: Message) -> None:
     text = '''📜 <u><b>Що нового у Unicorn Bot</b></u>
+<b>07.07.2026</b>
+<i>Оновлення в грі "Числа"</i>
+• Якшо гра неактивна більше ніж добу, вона автоматично видаляється.
+• При спробі відправити не валідне число як здогадку, з'являється табличка, що число не валідне.
+• Тепер бот не спамить "⚠️ Немає гри, де очікується число." в приватних повідомленнях, якшо немає гри, в який користувач бере участь.
+<i>Різні виправлення помилок</i>
+
 <b>07.01.2026</b>
 <i>Оновлення команди /fix</i>
 • Відтепер, команда /fix може виправляти розкладку не лише текстових повідомлень, а й підписів під фото/відео/файлами.
 • Перероблене розпізнавання мови повідомлення
    
-<b>07.01.2026</b>
 <i>Оновлення прийняття спроб у грі "Числа"</i>
 • Відтепер, щоб надіслати здогадку, не потрібно використовувати команду /guess
 • Замість цього треба написати @PyUnicornBot [ваше число]
@@ -121,7 +128,7 @@ async def cmd_updates(message: Message) -> None:
 
 <u><b>Попередні оновлення:</b></u>
 05.01.2026 - оновлення команди /fix
-03.01.2026 - додання команди /updates, збереження імен користувачів
+03.01.2026 - додання команди /updates, кешування імен користувачів
 08.11.2025 - видалення команди /all
 04.08.2025 - оновлення команди /baby_unreg
 01.08.2025 - додання команди /all
@@ -129,7 +136,7 @@ async def cmd_updates(message: Message) -> None:
 27.07.2025 - додання команд /rules, /shypko, а також показ числа переможця у грі "Числа"
 26.07.2025 - додання гри "Числа"
 18.07.2025 - додання Пупсиків дня
-18.07.2025 - перехід на бібліоткеу aiogram
+18.07.2025 - перехід на бібліотеку aiogram
 '''
     await message.answer(text, parse_mode='HTML')
 
@@ -216,7 +223,7 @@ async def numbers_guess(message: Message) -> None:
     await message.reply(reply)
     await asyncio.sleep(1.5)
 
-    opponent_id = int(get_opponent_id(chat_id, user_id))
+    opponent_id = get_opponent_id(chat_id, user_id)
 
     opponent_link = get_user_link(opponent_id)
     user_link = get_user_link(user_id)
@@ -294,15 +301,26 @@ async def numbers_guess(message: Message) -> None:
 async def inline_guess_number(query: InlineQuery):
     text = query.query.strip()
 
-    if not text or not text.isdigit() or len(text) != 4:
+    if not text:
         await query.answer(results=[], is_personal=True, cache_time=1)
+        return
+
+    if not text.isdigit() or len(text) != 4 or text[0] == '0' or len(set(text)) != 4:
+        result = InlineQueryResultArticle(
+            id='invalid_number',
+            title='❌ Не валідне число',
+            description='• рівно 4 цифри\n• не починається з 0\n• всі цифри різні',
+            input_message_content=InputTextMessageContent(message_text='Яке треба число?')
+        )
+        await query.answer(results=[result], is_personal=True, cache_time=1)
         return
 
     result = InlineQueryResultArticle(
         id='numbers_guess',
         title=f'Зробити припущення: {text}',
         description='Надіслати це число як здогадку',
-        input_message_content=InputTextMessageContent(message_text=text))
+        input_message_content=InputTextMessageContent(message_text=text)
+    )
 
     await query.answer(results=[result], is_personal=True, cache_time=1)
 
@@ -368,7 +386,7 @@ async def callback_baby_unreg(callback: CallbackQuery) -> None:
         return
     deleted = unregister_user(int(str_chat_id), int(str_creator_id))
     if deleted:
-        await callback.answer('Тебе було виключино з Пупсиків😢', show_alert=True)
+        await callback.answer('Тебе було виключено з Пупсиків😢', show_alert=True)
         await callback.message.answer(f'{get_user_link(user_id)} покинув список Пупсиків😭', parse_mode='HTML')
         await callback.message.delete()
     else:
@@ -421,7 +439,11 @@ async def admin_cmd_upload_users_data(message: Message) -> None:
     await message.answer('Файл успішно оновлено.')
 
 
-@dp.message(F.chat.type == 'private', F.text)
+async def awaiting_number_filter(message: Message) -> bool:
+    return is_awaiting_number(message.from_user.id)
+
+
+@dp.message(F.chat.type == 'private', F.text, awaiting_number_filter)
 async def set_number(message: Message) -> None:
     user_id = message.from_user.id
     number_str = message.text.strip()
@@ -437,7 +459,19 @@ async def set_number(message: Message) -> None:
                                                  parse_mode='HTML')
 
 
+async def cleanup_stale_games_loop() -> None:
+    while True:
+        await asyncio.sleep(60 * 60)  # раз на годину
+        stale_chat_ids = cleanup_stale_games()
+        for str_chat_id in stale_chat_ids:
+            try:
+                await bot.send_message(int(str_chat_id), '🗑 Гру "Числа" видалено через бездіяльність (більше доби без активності).')
+            except Exception:
+                pass  # бота могли видалити з чату/заблокувати за цей час
+
+
 async def main() -> None:
+    asyncio.create_task(cleanup_stale_games_loop())
     await dp.start_polling(bot)
 
 

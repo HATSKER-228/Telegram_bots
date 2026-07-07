@@ -5,6 +5,7 @@ KB_LAYOUTS: dict[str, str] = {
     'qwerty': '`1234567890-=qwertyuiop[]\\asdfghjkl;\'zxcvbnm,./~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?',
     'ytsuken': '\'1234567890-=йцукенгшщзхї\фівапролджєячсмитьбю.₴!"№;%:?*()_+ЙЦУКЕНГШЩЗХЇ/ФІВАПРОЛДЖЄЯЧСМИТЬБЮ,'
 }
+
 PROTECTED_ENTITIES: set[str] = {
     'mention', 'hashtag', 'cashtag', 'bot_command', 'url',
     'email', 'code', 'pre', 'text_link', 'text_mention'
