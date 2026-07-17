@@ -146,10 +146,11 @@ def get_random_num() -> str:
             return ''.join(number)
 
 
-def get_number(chat_id: int, user_id: int) -> str | None:
+def get_number(chat_id: int, user_id: int, data: dict | None = None) -> str | None:
     str_chat_id = str(chat_id)
     str_user_id = str(user_id)
-    data = load_data()
+    if data is None:
+        data = load_data()
 
     if str_chat_id not in data or str_user_id not in data[str_chat_id]['players']:
         return None
@@ -169,25 +170,28 @@ def get_clue(guess: str, target: str) -> str:
     return result if len(result) > 0 else '-'
 
 
-def get_opponent_id(chat_id: int, user_id: int) -> int:
+def get_opponent_id(chat_id: int, user_id: int, data: dict | None = None) -> int:
     str_user_id = str(user_id)
-    data = load_data()
+    if data is None:
+        data = load_data()
     for str_id in data[str(chat_id)]['players']:
         if str_id != str_user_id:
             return int(str_id)
     raise ValueError(f'[numbers_tools.get_opponent_id] Opponent not found in chat {chat_id} for user {user_id}')
 
 
-def get_guesses(chat_id: int, user_id: int) -> str:
-    data = load_data()
+def get_guesses(chat_id: int, user_id: int, data: dict | None = None) -> str:
+    if data is None:
+        data = load_data()
     guesses = ''
     for number, clue in data[str(chat_id)]['players'][str(user_id)]['guesses']:
         guesses += f'{number} {clue}\n'
     return guesses
 
 
-def get_user_finished(chat_id: int, user_id: int) -> bool:
-    data = load_data()
+def get_user_finished(chat_id: int, user_id: int, data: dict | None = None) -> bool:
+    if data is None:
+        data = load_data()
     return data[str(chat_id)]['players'][str(user_id)]['finished']
 
 
@@ -205,7 +209,7 @@ def guess_number(chat_id: int, user_id: int, str_number: str) -> tuple[bool, str
     if str_user_id not in data[str_chat_id]['players']:
         return False, '❌ Ти не береш участі в поточній грі.'
 
-    str_opponent_id = str(get_opponent_id(chat_id, user_id))
+    str_opponent_id = str(get_opponent_id(chat_id, user_id, data))
 
     if not str_opponent_id:
         return False, '️⚠️ Опонент ще не приєднався.'
