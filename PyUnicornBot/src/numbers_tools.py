@@ -1,13 +1,13 @@
 import json
-import os
+from pathlib import Path
 from random import sample
 from time import time
 
-FILE_PATH = 'PyUnicornBot/data/data_numbers.json'
-STALE_TIMEOUT = 24 * 60 * 60  # доба
+FILE_PATH = Path(__file__).resolve().parent.parent / 'data' / 'data_numbers.json'
+STALE_TIMEOUT: int = 24 * 60 * 60  # 1 day
 
 def load_data() -> dict:
-    if not os.path.exists(FILE_PATH):
+    if not FILE_PATH.exists():
         return {}
     with open(FILE_PATH, encoding='utf-8') as f:
         return json.load(f)

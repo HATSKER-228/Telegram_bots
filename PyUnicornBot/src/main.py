@@ -13,9 +13,10 @@ import keyboards as kb
 import fix_layout as fl
 import middlewares as mw
 
-
+ADMIN_ID = 1250738671
 bot = Bot(token=os.environ.get('TOKEN'))
 dp = Dispatcher()
+
 dp.update.middleware(mw.UserUpdateMiddleware())
 dp.message.middleware(mw.GroupOnlyCmdMiddleware())
 dp.message.middleware(mw.ReplyOnlyCmdMiddleware())
@@ -387,7 +388,7 @@ async def callback_baby_unreg(callback: CallbackQuery) -> None:
         await callback.answer(text='Тебе не було в списку пупсиків. Варто приєднатися!', show_alert=True)
 
 
-@dp.message(Command('get_jsons'), F.chat.type == 'private', F.from_user.id == 1250738671)
+@dp.message(Command('get_jsons'), F.chat.type == 'private', F.from_user.id == ADMIN_ID)
 async def admin_cmd_get_jsons(message: Message) -> None:
     babies = FSInputFile(baby.FILE_PATH)
     numbers = FSInputFile(num.FILE_PATH)
@@ -397,7 +398,7 @@ async def admin_cmd_get_jsons(message: Message) -> None:
     await message.answer_document(users)
 
 
-@dp.message(Command('upload_baby_stats'), F.chat.type == 'private', F.from_user.id == 1250738671)
+@dp.message(Command('upload_baby_stats'), F.chat.type == 'private', F.from_user.id == ADMIN_ID)
 async def admin_cmd_upload_baby_stats(message: Message) -> None:
     if not message.document:
         await message.answer('Будь ласка, надішли файл як документ.')
@@ -415,7 +416,7 @@ async def admin_cmd_upload_baby_stats(message: Message) -> None:
     await message.answer('Файл зі статистикою успішно оновлено.')
 
 
-@dp.message(Command('upload_users_data'), F.chat.type == 'private', F.from_user.id == 1250738671)
+@dp.message(Command('upload_users_data'), F.chat.type == 'private', F.from_user.id == ADMIN_ID)
 async def admin_cmd_upload_users_data(message: Message) -> None:
     if not message.document:
         await message.answer('Будь ласка, надішли файл як документ.')

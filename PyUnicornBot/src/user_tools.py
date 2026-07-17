@@ -1,14 +1,14 @@
 import json
-import os
+from pathlib import Path
 from time import time
 from aiogram.types import User
 
-FILE_PATH: str = 'PyUnicornBot/data/data_users.json'
+FILE_PATH = Path(__file__).resolve().parent.parent / 'data' / 'data_users.json'
 UPDATE_INTERVAL: int = 24 * 60 * 60 # 1 day
 
 
 def load_data() -> dict:
-    if not os.path.exists(FILE_PATH):
+    if not FILE_PATH.exists():
         return {}
     with open(FILE_PATH, encoding='utf-8') as f:
         return json.load(f)

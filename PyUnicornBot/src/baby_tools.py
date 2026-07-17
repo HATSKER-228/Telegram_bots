@@ -1,17 +1,16 @@
 import json
-import os
+from pathlib import Path
 from random import choice
 from datetime import date
 
-FILE_PATH: str = 'PyUnicornBot/data/data_baby.json'
-
+FILE_PATH = Path(__file__).resolve().parent.parent / 'data' / 'data_baby.json'
 
 def get_today() -> str:
     return date.today().isoformat()
 
 
 def load_data() -> dict:
-    if not os.path.exists(FILE_PATH):
+    if not FILE_PATH.exists():
         return {}
     with open(FILE_PATH, encoding='utf-8') as f:
         return json.load(f)
