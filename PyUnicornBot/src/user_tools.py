@@ -54,9 +54,10 @@ def update_user(user: User) -> None:
         save_data(data)
 
 
-def get_user_tag(user_id: int) -> str:
+def get_user_tag(user_id: int, data: dict | None = None) -> str:
     str_user_id = str(user_id)
-    data = load_data()
+    if data is None:
+        data = load_data()
 
     if str_user_id not in data:
         return f'<a href="tg://user?id={user_id}">unknown user (id: {user_id})</a>'
@@ -64,16 +65,17 @@ def get_user_tag(user_id: int) -> str:
     if username := data[str_user_id].get('username'):
         return f'@{username}'
 
-    return get_user_link(user_id)
+    return get_user_link(user_id, data)
 
 
-def get_user_link(user_id: int) -> str:
-    return f'<a href="tg://user?id={user_id}">{get_user_full_name(user_id)}</a>'
+def get_user_link(user_id: int, data: dict | None = None) -> str:
+    return f'<a href="tg://user?id={user_id}">{get_user_full_name(user_id, data)}</a>'
 
 
-def get_username(user_id: int) -> str:
+def get_username(user_id: int, data: dict | None = None) -> str:
     str_user_id = str(user_id)
-    data = load_data()
+    if data is None:
+        data = load_data()
 
     if str_user_id not in data:
         return f'unknown user (id: {user_id})'
@@ -82,12 +84,13 @@ def get_username(user_id: int) -> str:
     if username:
         return username
 
-    return get_user_full_name(user_id)
+    return get_user_full_name(user_id, data)
 
 
-def get_user_full_name(user_id: int) -> str:
+def get_user_full_name(user_id: int, data: dict | None = None) -> str:
     str_user_id = str(user_id)
-    data = load_data()
+    if data is None:
+        data = load_data()
 
     if str_user_id not in data:
         return f'unknown user (id: {user_id})'

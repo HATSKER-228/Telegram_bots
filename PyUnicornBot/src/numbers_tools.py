@@ -180,13 +180,14 @@ def get_opponent_id(chat_id: int, user_id: int, data: dict | None = None) -> int
     raise ValueError(f'[numbers_tools.get_opponent_id] Opponent not found in chat {chat_id} for user {user_id}')
 
 
-def get_guesses(chat_id: int, user_id: int, data: dict | None = None) -> str:
+def get_guesses(chat_id: int, user_id: int, data: dict | None = None) -> list[tuple[str, str]]:
     if data is None:
         data = load_data()
-    guesses = ''
-    for number, clue in data[str(chat_id)]['players'][str(user_id)]['guesses']:
-        guesses += f'{number} {clue}\n'
-    return guesses
+    return data[str(chat_id)]['players'][str(user_id)]['guesses']
+
+
+def format_guesses(guesses: list[tuple[str, str]]) -> str:
+    return ''.join(f'{number} {clue}\n' for number, clue in guesses)
 
 
 def get_user_finished(chat_id: int, user_id: int, data: dict | None = None) -> bool:

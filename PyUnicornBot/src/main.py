@@ -107,7 +107,7 @@ async def cmd_rules(message: Message) -> None:
 async def cmd_updates(message: Message) -> None:
     text = '''📜 <u><b>Що нового у Unicorn Bot</b></u>
 <b>17.07.2026</b>    
-<i>Різні виправлення помилок</i>
+<i>Різні виправлення помилок та оптимізація</i>
 
 <b>07.07.2026</b>
 <i>Оновлення в грі "Числа"</i>
@@ -225,8 +225,8 @@ async def numbers_guess(message: Message) -> None:
     user_guesses = num.get_guesses(chat_id, user_id, data)
     opponent_guesses = num.get_guesses(chat_id, opponent_id, data)
 
-    user_attempts = user_guesses.count('\n')
-    opponent_attempts = opponent_guesses.count('\n')
+    user_attempts = len(user_guesses)
+    opponent_attempts = len(opponent_guesses)
 
     user_finished = num.get_user_finished(chat_id, user_id, data)
     opponent_finished = num.get_user_finished(chat_id, opponent_id, data)
@@ -285,10 +285,10 @@ async def numbers_guess(message: Message) -> None:
                 parse_mode='HTML')
 
         case 'continue':
-            await message.answer(f'Спроби {user_link}:\n' + user_guesses, parse_mode='HTML')
+            await message.answer(f'Спроби {user_link}:\n' + num.format_guesses(user_guesses), parse_mode='HTML')
             await message.answer(f'🟢Черга {opponent_link}', parse_mode='HTML')
             if opponent_attempts != 0:
-                await message.answer(f'Спроби {opponent_link}:\n' + opponent_guesses, parse_mode='HTML')
+                await message.answer(f'Спроби {opponent_link}:\n' + num.format_guesses(opponent_guesses), parse_mode='HTML')
 
 
 @dp.inline_query()
