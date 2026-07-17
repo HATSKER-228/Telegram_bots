@@ -15,7 +15,7 @@ import fix_layout as fl
 import midwares_filters as mwf
 
 ADMIN_ID = 1250738671
-bot = Bot(token="8159707276:AAFb8pIxJA0F1r-qhfTFm_NkH7GZYugVoHE")
+bot = Bot(token=os.environ.get('TOKEN'))
 dp = Dispatcher()
 
 dp.update.middleware(mwf.UserUpdateMiddleware())
