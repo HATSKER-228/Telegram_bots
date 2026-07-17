@@ -1,26 +1,24 @@
 import asyncio
 import shutil
 import os
+
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, FSInputFile, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
-from random import randint
+from random import randint, choice
 
 import baby_tools as baby
 import numbers_tools as num
 import user_tools as us
 import keyboards as kb
 import fix_layout as fl
-import middlewares as mw
+import midwares_filters as mwf
 
 ADMIN_ID = 1250738671
-bot = Bot(token=os.environ.get('TOKEN'))
+bot = Bot(token="8159707276:AAFb8pIxJA0F1r-qhfTFm_NkH7GZYugVoHE")
 dp = Dispatcher()
 
-dp.update.middleware(mw.UserUpdateMiddleware())
-dp.message.middleware(mw.GroupOnlyCmdMiddleware())
-dp.message.middleware(mw.ReplyOnlyCmdMiddleware())
-
+dp.update.middleware(mwf.UserUpdateMiddleware())
 
 @dp.message(Command('start'))
 async def cmd_start(message: Message) -> None:
@@ -55,7 +53,7 @@ async def cmd_help(message: Message) -> None:
 /cancel - скасувати гру''', parse_mode='HTML')
 
 
-@dp.message(Command('fix'))
+@dp.message(Command('fix'), mwf.ReplyOnlyFilter())
 async def cmd_fix(message: Message) -> None:
     replied = message.reply_to_message
     text = replied.text or replied.caption
@@ -73,7 +71,7 @@ async def cmd_fix(message: Message) -> None:
                             'відповідь на ТЕКСТ 🧌', parse_mode='HTML')
 
 
-@dp.message(Command('shypko'))
+@dp.message(Command('shypko'), mwf.ReplyOnlyFilter())
 async def cmd_shypko(message: Message) -> None:
     await message.reply_to_message.reply(f'Я оцінюю це повідомлення на {randint(0, 10)} шипко з 10.')
 
@@ -108,6 +106,9 @@ async def cmd_rules(message: Message) -> None:
 async def cmd_updates(message: Message) -> None:
     text = '''📜 <u><b>Що нового у Unicorn Bot</b></u>
 <b>17.07.2026</b>    
+<i>Анімація обирання Пупсика дня</i>
+• Якшо Пупсика сьогодні все ще не обрано, то під час вибору бот буде крутить рулетку хто сьогодні Пупсик.
+
 <i>Різні виправлення помилок та оптимізація</i>
 
 <b>07.07.2026</b>
@@ -134,7 +135,7 @@ async def cmd_updates(message: Message) -> None:
     await message.answer(text, parse_mode='HTML')
 
 
-@dp.message(Command('baby_reg'))
+@dp.message(Command('baby_reg'), mwf.GroupOnlyFilter())
 async def cmd_baby_reg(message: Message) -> None:
     user = message.from_user
 
@@ -145,7 +146,7 @@ async def cmd_baby_reg(message: Message) -> None:
         await message.reply('Ти вже зареєстрований як пупсик 😘')
 
 
-@dp.message(Command('baby_unreg'))
+@dp.message(Command('baby_unreg'), mwf.GroupOnlyFilter())
 async def cmd_baby_unreg(message: Message) -> None:
     user_id = message.from_user.id
     in_list = baby.is_in_list(message.chat.id, user_id)
@@ -158,19 +159,41 @@ async def cmd_baby_unreg(message: Message) -> None:
     await message.delete()
 
 
-@dp.message(Command('baby_select'))
+@dp.message(Command('baby_select'), mwf.GroupOnlyFilter())
 async def cmd_baby_select(message: Message) -> None:
     chat_id: int = message.chat.id
     is_successful, baby_id = baby.select_baby(chat_id)
-    if is_successful:
-        await message.answer(f'🎉 Пупсик дня — {us.get_user_tag(baby_id)}!', parse_mode='HTML')
-    elif baby_id:
-        await message.reply(f'Сьогоднішній пупсік уже обраний: {us.get_user_tag(baby_id)}💖', parse_mode='HTML')
-    else:
+
+    if not is_successful and baby_id is None:
         await message.reply('У цьому чаті ще немає зареєстрованих пупсіків😢')
+        return
+
+    if not is_successful:
+        await message.reply(f'Сьогоднішній пупсік уже обраний: {us.get_user_tag(baby_id)}💖', parse_mode='HTML')
+        return
+
+    players = baby.get_players(chat_id)
+    candidates = [p for p in players if p != baby_id] or players
+
+    spin_frames = ['🎰', '🎲', '🔄', '🌀', '✨']
+    spin_msg = await message.answer(f'{spin_frames[0]} Запускаю рулеточку Пупсиків...')
+
+    for i in range(6):
+        await asyncio.sleep(1)
+        candidate = choice(candidates) if candidates else baby_id
+        frame = spin_frames[i % len(spin_frames)]
+        try:
+            await spin_msg.edit_text(
+                f'{frame} Кручу-верчу, обрати Пупсика хочу...\n👉 {us.get_user_tag(candidate)}',
+                parse_mode='HTML'
+            )
+        except Exception:
+            pass
+
+    await message.answer(f'🎉 Пупсик дня — {us.get_user_tag(baby_id)}!', parse_mode='HTML')
 
 
-@dp.message(Command('baby_stats'))
+@dp.message(Command('baby_stats'), mwf.GroupOnlyFilter())
 async def cmd_baby_stats(message: Message) -> None:
     data = baby.get_stats(message.chat.id)
     if data:
@@ -182,7 +205,7 @@ async def cmd_baby_stats(message: Message) -> None:
         await message.reply('У цьому чаті ще немає зареєстрованих Пупсіків 😢')
 
 
-@dp.message(Command('create'))
+@dp.message(Command('create'), mwf.GroupOnlyFilter())
 async def cmd_numbers_create_game(message: Message) -> None:
     chat_id = message.chat.id
     user_id = message.from_user.id
@@ -195,7 +218,7 @@ async def cmd_numbers_create_game(message: Message) -> None:
         await message.reply('У цьому чаті вже створена гра.')
 
 
-@dp.message(Command('cancel'))
+@dp.message(Command('cancel'), mwf.GroupOnlyFilter())
 async def cmd_numbers_cancel(message: Message) -> None:
     reply = num.cancel_game(message.chat.id)
     await message.answer(reply)

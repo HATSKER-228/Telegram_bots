@@ -103,3 +103,13 @@ def select_baby(chat_id: int) -> tuple[bool, int | None]:
 
     save_data(data)
     return True, int(winner_id)
+
+
+def get_players(chat_id: int) -> list[int]:
+    data: dict = load_data()
+    str_chat_id = str(chat_id)
+
+    if str_chat_id not in data:
+        return []
+
+    return [int(uid) for uid in data[str_chat_id]['players'].keys()]
