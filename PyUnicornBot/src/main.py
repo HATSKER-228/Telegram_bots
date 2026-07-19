@@ -20,6 +20,7 @@ dp = Dispatcher()
 
 dp.update.middleware(mwf.UserUpdateMiddleware())
 
+
 @dp.message(Command('start'))
 async def cmd_start(message: Message) -> None:
     if message.chat.type == 'private':
@@ -189,7 +190,8 @@ async def cmd_baby_select(message: Message) -> None:
             )
         except Exception:
             pass
-
+    await asyncio.sleep(1)
+    await spin_msg.edit_text('А ось і він ...', parse_mode='HTML')
     await message.answer(f'🎉 Пупсик дня — {us.get_user_tag(baby_id)}!', parse_mode='HTML')
 
 
