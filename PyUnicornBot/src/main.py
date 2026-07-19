@@ -191,7 +191,10 @@ async def cmd_baby_select(message: Message) -> None:
         except Exception:
             pass
     await asyncio.sleep(1)
-    await spin_msg.edit_text('А ось і він ...', parse_mode='HTML')
+    try:
+        await spin_msg.edit_text('А ось і він ...', parse_mode='HTML')
+    except Exception:
+        pass
     await message.answer(f'🎉 Пупсик дня — {us.get_user_tag(baby_id)}!', parse_mode='HTML')
 
 
