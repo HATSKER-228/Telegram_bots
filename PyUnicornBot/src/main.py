@@ -4,7 +4,7 @@ import os
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, FSInputFile, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
+from aiogram.types import Message, CallbackQuery, FSInputFile, InlineQuery, InlineQueryResultArticle, InputTextMessageContent, MessageReactionUpdated
 from random import randint, choice
 
 import baby_tools as baby
@@ -109,6 +109,7 @@ async def cmd_updates(message: Message) -> None:
 <b>27.08.2026</b>    
 <i>👍</i>
 • Тепер в групах, якщо хтось напише 👍, бот теж відповість 👍
+• Бот ставить реакцію "👍", якщо хтось теж поставив "👍"
     
 <b>17.07.2026</b>    
 <i>Анімація обирання Пупсика дня</i>
@@ -137,6 +138,18 @@ async def cmd_updates(message: Message) -> None:
 @dp.message(F.chat.type.in_({'group', 'supergroup'}), F.text.contains('👍'))
 async def thumbs_up_reply(message: Message) -> None:
     await message.reply('👍')
+
+
+@dp.message_reaction()
+async def on_like_reaction(event: MessageReactionUpdated) -> None:
+    liked = any(r.type == 'emoji' and r.emoji == '👍' for r in event.new_reaction)
+
+    if liked:
+        await event.bot.set_message_reaction(
+            chat_id=event.chat.id,
+            message_id=event.message_id,
+            reaction=[{'type': 'emoji', 'emoji': '👍'}]
+        )
 
 
 @dp.message(Command('baby_reg'), mwf.GroupOnlyFilter())
@@ -498,7 +511,7 @@ async def cleanup_stale_games_loop() -> None:
 
 async def main() -> None:
     asyncio.create_task(cleanup_stale_games_loop())
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, allowed_updates=['message', 'callback_query', 'inline_query', 'message_reaction'])
 
 
 if __name__ == "__main__":
