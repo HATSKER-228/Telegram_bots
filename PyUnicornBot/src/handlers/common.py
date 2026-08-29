@@ -125,7 +125,10 @@ async def cmd_updates(message: Message) -> None:
 
 @router.message(F.chat.type.in_({'group', 'supergroup'}), F.text.contains('👍'))
 async def thumbs_up_reply(message: Message) -> None:
-    await message.reply('👍')
+    try:
+        await message.reply('👍')
+    except Exception:
+        pass
 
 
 @router.message_reaction()
@@ -133,8 +136,11 @@ async def on_like_reaction(event: MessageReactionUpdated) -> None:
     liked = any(r.type == 'emoji' and r.emoji == '👍' for r in event.new_reaction)
 
     if liked:
-        await event.bot.set_message_reaction(
-            chat_id=event.chat.id,
-            message_id=event.message_id,
-            reaction=[{'type': 'emoji', 'emoji': '👍'}]
-        )
+        try:
+            await event.bot.set_message_reaction(
+                chat_id=event.chat.id,
+                message_id=event.message_id,
+                reaction=[{'type': 'emoji', 'emoji': '👍'}]
+            )
+        except Exception:
+            pass
