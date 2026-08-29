@@ -12,7 +12,7 @@ router = Router()
 
 
 @router.message(Command('get_jsons'), F.chat.type == 'private', F.from_user.id == ADMIN_ID)
-async def admin_cmd_get_jsons(message: Message) -> None:
+async def cmd_get_jsons(message: Message) -> None:
     babies = FSInputFile(baby.FILE_PATH)
     numbers = FSInputFile(num.FILE_PATH)
     users = FSInputFile(us.FILE_PATH)
@@ -22,7 +22,7 @@ async def admin_cmd_get_jsons(message: Message) -> None:
 
 
 @router.message(Command('upload_baby_stats'), F.chat.type == 'private', F.from_user.id == ADMIN_ID)
-async def admin_cmd_upload_baby_stats(message: Message) -> None:
+async def cmd_upload_baby_stats(message: Message) -> None:
     if not message.document:
         await message.answer('Будь ласка, надішли файл як документ.')
         return
@@ -40,7 +40,7 @@ async def admin_cmd_upload_baby_stats(message: Message) -> None:
 
 
 @router.message(Command('upload_users_data'), F.chat.type == 'private', F.from_user.id == ADMIN_ID)
-async def admin_cmd_upload_users_data(message: Message) -> None:
+async def cmd_upload_users_data(message: Message) -> None:
     if not message.document:
         await message.answer('Будь ласка, надішли файл як документ.')
         return

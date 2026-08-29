@@ -12,7 +12,7 @@ router = Router()
 
 
 @router.message(Command('create'), mwf.GroupOnlyFilter())
-async def cmd_numbers_create_game(message: Message) -> None:
+async def cmd_create_game(message: Message) -> None:
     chat_id = message.chat.id
     user_id = message.from_user.id
 
@@ -25,13 +25,13 @@ async def cmd_numbers_create_game(message: Message) -> None:
 
 
 @router.message(Command('cancel'), mwf.GroupOnlyFilter())
-async def cmd_numbers_cancel(message: Message) -> None:
+async def cmd_cancel_game(message: Message) -> None:
     reply = num.cancel_game(message.chat.id)
     await message.answer(reply)
 
 
 @router.inline_query()
-async def inline_guess_number(query: InlineQuery):
+async def inline_sending_guess(query: InlineQuery):
     text = query.query.strip()
 
     if not text:
@@ -106,7 +106,7 @@ async def callback_gen_random_num(callback: CallbackQuery) -> None:
 
 
 @router.message(F.via_bot.id == F.bot.id)
-async def numbers_guess(message: Message) -> None:
+async def handle_guess(message: Message) -> None:
     chat_id = message.chat.id
     user_id = message.from_user.id
 

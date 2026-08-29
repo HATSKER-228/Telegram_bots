@@ -13,7 +13,7 @@ router = Router()
 
 
 @router.message(Command('baby_reg'), mwf.GroupOnlyFilter())
-async def cmd_baby_reg(message: Message) -> None:
+async def cmd_reg(message: Message) -> None:
     user = message.from_user
 
     added = baby_tools.register_user(message.chat.id, user.id)
@@ -24,7 +24,7 @@ async def cmd_baby_reg(message: Message) -> None:
 
 
 @router.message(Command('baby_unreg'), mwf.GroupOnlyFilter())
-async def cmd_baby_unreg(message: Message) -> None:
+async def cmd_unreg(message: Message) -> None:
     user_id = message.from_user.id
     in_list = baby_tools.is_in_list(message.chat.id, user_id)
     if not in_list:
@@ -37,7 +37,7 @@ async def cmd_baby_unreg(message: Message) -> None:
 
 
 @router.message(Command('baby_select'), mwf.GroupOnlyFilter())
-async def cmd_baby_select(message: Message) -> None:
+async def cmd_select(message: Message) -> None:
     chat_id: int = message.chat.id
     is_successful, baby_id = baby_tools.select_baby(chat_id)
 
@@ -75,7 +75,7 @@ async def cmd_baby_select(message: Message) -> None:
 
 
 @router.message(Command('baby_stats'), mwf.GroupOnlyFilter())
-async def cmd_baby_stats(message: Message) -> None:
+async def cmd_stats(message: Message) -> None:
     data = baby_tools.get_stats(message.chat.id)
     if data:
         s = 'Статистика Пупсиків дня:\n'
@@ -87,7 +87,7 @@ async def cmd_baby_stats(message: Message) -> None:
 
 
 @router.callback_query(F.data.startswith('baby_unreg'))
-async def callback_baby_unreg(callback: CallbackQuery) -> None:
+async def callback_unreg(callback: CallbackQuery) -> None:
     _, action, str_chat_id, str_creator_id = callback.data.split('/')
     user_id = callback.from_user.id
 
