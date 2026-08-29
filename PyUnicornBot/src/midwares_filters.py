@@ -1,7 +1,7 @@
 from aiogram import BaseMiddleware
 from aiogram.types import Message
 from aiogram.filters import BaseFilter
-from user_tools import update_user
+from src.tools.user import update_user
 
 
 class UserUpdateMiddleware(BaseMiddleware):

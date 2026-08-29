@@ -1,9 +1,10 @@
 import json
-from pathlib import Path
 from random import choice
 from datetime import date
 
-FILE_PATH = Path(__file__).resolve().parent.parent / 'data' / 'data_baby.json'
+from src.config import DATA_DIR
+
+FILE_PATH = DATA_DIR / 'baby.json'
 
 def get_today() -> str:
     return date.today().isoformat()

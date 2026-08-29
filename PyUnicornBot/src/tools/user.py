@@ -1,9 +1,10 @@
 import json
-from pathlib import Path
 from time import time
 from aiogram.types import User
 
-FILE_PATH = Path(__file__).resolve().parent.parent / 'data' / 'data_users.json'
+from src.config import DATA_DIR
+
+FILE_PATH = DATA_DIR / 'users.json'
 UPDATE_INTERVAL: int = 24 * 60 * 60 # 1 day
 
 

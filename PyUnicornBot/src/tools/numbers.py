@@ -1,9 +1,10 @@
 import json
-from pathlib import Path
 from random import sample
 from time import time
 
-FILE_PATH = Path(__file__).resolve().parent.parent / 'data' / 'data_numbers.json'
+from src.config import DATA_DIR
+
+FILE_PATH = DATA_DIR / 'numbers.json'
 STALE_TIMEOUT: int = 24 * 60 * 60  # 1 day
 
 def load_data() -> dict:
