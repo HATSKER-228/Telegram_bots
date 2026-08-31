@@ -3,6 +3,7 @@ from random import sample
 from time import time
 
 from src.config import DATA_DIR
+from src.func_results import SetNumberResult
 
 FILE_PATH = DATA_DIR / 'numbers.json'
 STALE_TIMEOUT: int = 24 * 60 * 60  # 1 day
@@ -47,7 +48,7 @@ def create_game(chat_id: int, user_id: int) -> bool:
     return True
 
 
-def join_to_game(chat_id: int, user_id: int, creator_id: int) -> tuple[bool, str]:
+def join_game(chat_id: int, user_id: int, creator_id: int) -> tuple[bool, str]:
     str_chat_id = str(chat_id)
     str_user_id = str(user_id)
     data = load_data()
@@ -86,7 +87,7 @@ def is_awaiting_number(user_id: int) -> bool:
     return False
 
 
-def set_player_number(user_id: int, str_number: str) -> tuple[bool, str, int | None, int | None]:
+def set_player_number(user_id: int, str_number: str) -> SetNumberResult:
     str_user_id = str(user_id)
     data = load_data()
 
@@ -96,14 +97,14 @@ def set_player_number(user_id: int, str_number: str) -> tuple[bool, str, int | N
         if str_user_id not in game['players']:
             continue
         if game['players'][str_user_id]['number'] is not None:
-            return False, '❗ У тебе вже є число.', None, None
+            return SetNumberResult(message='❗ У тебе вже є число.')
 
         if not str_number.isdigit() or len(str_number) != 4:
-            return False, '❌ Число повинно містити рівно 4 цифри.', None, None
+            return SetNumberResult(message='❌ Число повинно містити рівно 4 цифри.')
         if str_number[0] == '0':
-            return False, '❌ Число не повинно починатися з 0.', None, None
+            return SetNumberResult(message='❌ Число не повинно починатися з 0.')
         if len(set(str_number)) != 4:
-            return False, '❌ Усі цифри мають бути різними.', None, None
+            return SetNumberResult(message='❌ Усі цифри мають бути різними.')
 
         data[str_chat_id]['players'][str_user_id]['number'] = str_number
         touch_game(data, str_chat_id)
@@ -115,11 +116,14 @@ def set_player_number(user_id: int, str_number: str) -> tuple[bool, str, int | N
             data[str_chat_id]['status'] = 'ongoing'
             touch_game(data, str_chat_id)
             save_data(data)
-            return True, '✅ Число прийнято! Усі гравці готові.', int(str_chat_id), first_player_id
+            return SetNumberResult(message='✅ Число прийнято! Усі гравці готові.',
+                                   game_ready=True,
+                                   chat_id=int(str_chat_id),
+                                   first_player_id=first_player_id)
         else:
-            return True, '✅ Число прийнято! Очікуємо опонента.', None, None
+            return SetNumberResult(message='✅ Число прийнято! Очікуємо опонента.')
 
-    return False, '⚠️ Немає гри, де очікується число.', None, None
+    return SetNumberResult(message='⚠️ Немає гри, де очікується число.')
 
 
 def cancel_game(chat_id: int) -> str:

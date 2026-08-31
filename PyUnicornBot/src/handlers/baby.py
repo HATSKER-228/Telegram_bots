@@ -4,6 +4,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 from random import choice
 
+from src.func_results import SelectBabyResult
 from src.tools import baby as baby_tools
 from src.tools import user as us
 from src import keyboards as kb
@@ -39,25 +40,25 @@ async def cmd_unreg(message: Message) -> None:
 @router.message(Command('baby_select'), mwf.GroupOnlyFilter())
 async def cmd_select(message: Message) -> None:
     chat_id: int = message.chat.id
-    is_successful, baby_id = baby_tools.select_baby(chat_id)
+    result: SelectBabyResult = baby_tools.select_baby(chat_id)
 
-    if not is_successful and baby_id is None:
+    if not result.has_players:
         await message.reply('У цьому чаті ще немає зареєстрованих пупсіків😢')
         return
 
-    if not is_successful:
-        await message.reply(f'Сьогоднішній пупсік уже обраний: {us.get_user_tag(baby_id)}💖', parse_mode='HTML')
+    if not result.selected:
+        await message.reply(f'Сьогоднішній пупсік уже обраний: {us.get_user_tag(result.baby_id)}💖', parse_mode='HTML')
         return
 
     players = baby_tools.get_players(chat_id)
-    candidates = [p for p in players if p != baby_id] or players
+    candidates = [p for p in players if p != result.baby_id] or players
 
     spin_frames = ['🎰', '🎲', '🔄', '🌀', '✨']
     spin_msg = await message.answer(f'{spin_frames[0]} Запускаю рулеточку Пупсиків...')
 
     for i in range(6):
         await asyncio.sleep(1)
-        candidate = choice(candidates) if candidates else baby_id
+        candidate = choice(candidates) if candidates else result.baby_id
         frame = spin_frames[i % len(spin_frames)]
         try:
             await spin_msg.edit_text(
@@ -71,7 +72,7 @@ async def cmd_select(message: Message) -> None:
         await spin_msg.edit_text('А ось і він ...', parse_mode='HTML')
     except Exception:
         pass
-    await message.answer(f'🎉 Пупсик дня — {us.get_user_tag(baby_id)}!', parse_mode='HTML')
+    await message.answer(f'🎉 Пупсик дня — {us.get_user_tag(result.baby_id)}!', parse_mode='HTML')
 
 
 @router.message(Command('baby_stats'), mwf.GroupOnlyFilter())

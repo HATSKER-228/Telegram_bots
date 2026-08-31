@@ -3,6 +3,7 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from aiogram.filters import Command
 
+from src.func_results import SetNumberResult
 from src.tools import numbers as num
 from src.tools import user as us
 from src import keyboards as kb
@@ -18,8 +19,8 @@ async def cmd_create_game(message: Message) -> None:
 
     is_successful = num.create_game(chat_id, user_id)
     if is_successful:
-        await message.reply(f'🔢{us.get_user_link(user_id)} хоче зіграти в Числа!\nТикайте кнопку нижче👇',
-                            reply_markup=kb.join_game(chat_id, user_id), parse_mode='HTML')
+        await message.answer(f'🔢{us.get_user_link(user_id)} хоче зіграти в Числа!\nТикайте кнопку нижче👇',
+                            reply_markup=kb.num_join_game(chat_id, user_id), parse_mode='HTML')
     else:
         await message.reply('У цьому чаті вже створена гра.')
 
@@ -58,14 +59,14 @@ async def inline_sending_guess(query: InlineQuery):
     await query.answer(results=[result], is_personal=True, cache_time=1)
 
 
-@router.callback_query(F.data.startswith('join_game'))
+@router.callback_query(F.data.startswith('num_join'))
 async def callback_join_game(callback: CallbackQuery) -> None:
     _, str_chat_id, str_creator_id = callback.data.split('/')
     chat_id = int(str_chat_id)
     creator_id = int(str_creator_id)
     joiner_id = callback.from_user.id
 
-    is_successful, msg = num.join_to_game(chat_id, joiner_id, creator_id)
+    is_successful, msg = num.join_game(chat_id, joiner_id, creator_id)
 
     if is_successful:
         creator_tag = us.get_user_tag(creator_id)
@@ -205,12 +206,12 @@ async def set_number(message: Message) -> None:
     user_id = message.from_user.id
     number_str = message.text.strip()
 
-    success, reply, group_id, first_player_id = num.set_player_number(user_id, number_str)
+    result: SetNumberResult = num.set_player_number(user_id, number_str)
 
-    await message.answer(reply)
+    await message.answer(result.message)
 
-    if success and group_id is not None and first_player_id is not None:
-        await message.bot.send_message(group_id, '🎯 Обидва гравці надіслали числа! Починаймо гру!')
-        await message.bot.send_message(group_id, f'🟢Черга {us.get_user_link(first_player_id)}\n'
+    if result.game_ready:
+        await message.bot.send_message(result.chat_id, '🎯 Обидва гравці надіслали числа! Починаймо гру!')
+        await message.bot.send_message(result.chat_id, f'🟢Черга {us.get_user_link(result.first_player_id)}\n'
                                                  f'📩Надсилай здогадку написавши @PyUnicornBot',
                                                  parse_mode='HTML')

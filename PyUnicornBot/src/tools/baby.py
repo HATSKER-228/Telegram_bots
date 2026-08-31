@@ -3,6 +3,7 @@ from random import choice
 from datetime import date
 
 from src.config import DATA_DIR
+from src.func_results import SelectBabyResult
 
 FILE_PATH = DATA_DIR / 'baby.json'
 
@@ -83,17 +84,17 @@ def get_stats(chat_id: int) -> list | None:
     return sorted(stats, key=lambda x: x[1], reverse=True)
 
 
-def select_baby(chat_id: int) -> tuple[bool, int | None]:
+def select_baby(chat_id: int) -> SelectBabyResult:
     data: dict = load_data()
     str_chat_id = str(chat_id)
 
     if str_chat_id not in data or not data[str_chat_id]['players']:
-        return False, None
+        return SelectBabyResult(selected=False, baby_id=None, has_players=False)
 
     today: str = get_today()
     if data[str_chat_id]['last_play'] == today:
         last_id = data[str_chat_id]['last_winner']
-        return False, last_id
+        return SelectBabyResult(selected=False, baby_id=last_id, has_players=True)
 
     players: dict = data[str_chat_id]['players']
     winner_id: str = choice(list(players.keys()))
@@ -103,7 +104,7 @@ def select_baby(chat_id: int) -> tuple[bool, int | None]:
     data[str_chat_id]['last_winner'] = int(winner_id)
 
     save_data(data)
-    return True, int(winner_id)
+    return SelectBabyResult(selected=True, baby_id=int(winner_id), has_players=True)
 
 
 def get_players(chat_id: int) -> list[int]:
