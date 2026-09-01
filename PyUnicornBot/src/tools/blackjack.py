@@ -2,6 +2,7 @@ import json
 from time import time
 from random import shuffle
 
+from src.func_results import BjHitResult, BjStandResult
 from src.tools import user as us
 from src.config import DATA_DIR
 
@@ -83,6 +84,12 @@ def get_show_hand_text(chat_id: int, user_id: int) -> str:
 
     text = 'Твої карти: ' + ', '.join(hand)
     text += f'\nСума: {calculate_hand(hand)}'
+
+    if data[str_chat_id]['players'][str_user_id]['status'] == 'bust':
+        text += '\nТи перебрав 💥'
+    elif data[str_chat_id]['players'][str_user_id]['status'] == 'stand':
+        text += '\nТи завершив брати карти 🏁'
+
     return text
 
 
@@ -160,3 +167,68 @@ def start_game(chat_id: int, user_id: int) -> tuple[bool, str]:
     touch_game(data, str_chat_id)
     save_data(data)
     return True, ''
+
+
+def hit(chat_id: int, player_id: int) -> BjHitResult:
+    data = load_data()
+    str_chat_id = str(chat_id)
+    str_player_id = str(player_id)
+
+    if str_chat_id not in data:
+        return BjHitResult(message='В цьому чаті нема гри')
+
+    if str_player_id not in data[str_chat_id]['players']:
+        return BjHitResult(message='Зараз ти не граєш 🧌')
+
+    if data[str_chat_id]['players'][str_player_id]['status'] == 'stand':
+        return BjHitResult(message='Ти вже завершив(-ла) брати карти 🏁')
+
+    if data[str_chat_id]['players'][str_player_id]['status'] == 'bust':
+        return BjHitResult(message='Ти вже перебрав(-ла) 💥')
+
+    if str_player_id not in data[str_chat_id]['pending_this_round']:
+        return BjHitResult(message='Ти вже зробив(-ла) хід')
+
+    card = data[str_chat_id]['deck'].pop()
+    data[str_chat_id]['players'][str_player_id]['hand'].append(card)
+    data[str_chat_id]['pending_this_round'].remove(str_player_id)
+    summ = calculate_hand(data[str_chat_id]['players'][str_player_id]['hand'])
+
+    if summ > 21:
+        data[str_chat_id]['players'][str_player_id]['status'] = 'bust'
+
+    touch_game(data, str_chat_id)
+    save_data(data)
+
+    message = get_show_hand_text(chat_id, player_id)
+    return BjHitResult(message=message, success=True)
+
+
+def stand(chat_id: int, player_id: int) -> BjStandResult:
+    data = load_data()
+    str_chat_id = str(chat_id)
+    str_player_id = str(player_id)
+
+    if str_chat_id not in data:
+        return BjStandResult(message='В цьому чаті нема гри')
+
+    if str_player_id not in data[str_chat_id]['players']:
+        return BjStandResult(message='Зараз ти не граєш 🧌')
+
+    if data[str_chat_id]['players'][str_player_id]['status'] == 'stand':
+        return BjStandResult(message='Ти вже завершив(-ла) брати карти 🏁')
+
+    if data[str_chat_id]['players'][str_player_id]['status'] == 'bust':
+        return BjStandResult(message='Ти вже перебрав(-ла) 💥')
+
+    if str_player_id not in data[str_chat_id]['pending_this_round']:
+        return BjStandResult(message='Ти вже зробив(-ла) хід')
+
+    data[str_chat_id]['pending_this_round'].remove(str_player_id)
+    data[str_chat_id]['players'][str_player_id]['status'] = 'stand'
+
+    touch_game(data, str_chat_id)
+    save_data(data)
+
+    message = get_show_hand_text(chat_id, player_id)
+    return BjStandResult(message=message, success=True)

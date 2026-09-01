@@ -3,6 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 
 from src.tools import blackjack as bj
+from src.tools import user as us
 from src import keyboards as kb
 from src import midwares_filters as mwf
 
@@ -57,7 +58,7 @@ async def callback_start_game(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data.startswith('bj_show'))
-async def callback_stand(callback: CallbackQuery) -> None:
+async def callback_show_hand(callback: CallbackQuery) -> None:
     _, str_chat_id = callback.data.split('/')
     chat_id = int(str_chat_id)
     user_id = callback.from_user.id
@@ -68,10 +69,34 @@ async def callback_stand(callback: CallbackQuery) -> None:
 @router.callback_query(F.data.startswith('bj_hit'))
 async def callback_hit(callback: CallbackQuery) -> None:
     # TODO
-    ...
+    _, str_chat_id = callback.data.split('/')
+    chat_id = int(str_chat_id)
+    user_id = callback.from_user.id
+
+    result = bj.hit(chat_id, user_id)
+
+    await callback.answer(text=result.message, show_alert=True)
+
+    if result.success:
+        await callback.message.edit_text(text=bj.get_round_text(chat_id), parse_mode='HTML',
+                                         reply_markup=kb.bj_actions(chat_id))
+        await callback.bot.send_message(chat_id, text=f'{us.get_user_link(user_id)} взяв(-ла) карту 🃏',
+                                        parse_mode='HTML')
 
 
 @router.callback_query(F.data.startswith('bj_stand'))
 async def callback_stand(callback: CallbackQuery) -> None:
     # TODO
-    ...
+    _, str_chat_id = callback.data.split('/')
+    chat_id = int(str_chat_id)
+    user_id = callback.from_user.id
+
+    result = bj.stand(chat_id, user_id)
+
+    await callback.answer(text=result.message, show_alert=True)
+
+    if result.success:
+        await callback.message.edit_text(text=bj.get_round_text(chat_id), parse_mode='HTML',
+                                         reply_markup=kb.bj_actions(chat_id))
+        await callback.bot.send_message(chat_id, text=f'{us.get_user_link(user_id)} завершив(-ла) набирати карти 🃏',
+                                        parse_mode='HTML')

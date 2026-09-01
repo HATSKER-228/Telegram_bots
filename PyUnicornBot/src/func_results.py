@@ -13,3 +13,15 @@ class SetNumberResult:
     game_ready: bool = False
     chat_id: int | None = None
     first_player_id: int | None = None
+
+
+@dataclass
+class BjHitResult:
+    message: str
+    success: bool = False
+
+
+@dataclass
+class BjStandResult:
+    message: str
+    success: bool = False
