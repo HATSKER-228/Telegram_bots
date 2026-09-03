@@ -1,4 +1,4 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 
@@ -68,7 +68,6 @@ async def callback_show_hand(callback: CallbackQuery) -> None:
 
 @router.callback_query(F.data.startswith('bj_hit'))
 async def callback_hit(callback: CallbackQuery) -> None:
-    # TODO
     _, str_chat_id = callback.data.split('/')
     chat_id = int(str_chat_id)
     user_id = callback.from_user.id
@@ -77,16 +76,21 @@ async def callback_hit(callback: CallbackQuery) -> None:
 
     await callback.answer(text=result.message, show_alert=True)
 
-    if result.success:
+    if not result.success:
+        return
+
+    if not result.round_over:
         await callback.message.edit_text(text=bj.get_round_text(chat_id), parse_mode='HTML',
                                          reply_markup=kb.bj_actions(chat_id))
         await callback.bot.send_message(chat_id, text=f'{us.get_user_link(user_id)} взяв(-ла) карту 🃏',
                                         parse_mode='HTML')
+        return
+    # TODO
+    ...
 
 
 @router.callback_query(F.data.startswith('bj_stand'))
 async def callback_stand(callback: CallbackQuery) -> None:
-    # TODO
     _, str_chat_id = callback.data.split('/')
     chat_id = int(str_chat_id)
     user_id = callback.from_user.id
@@ -95,8 +99,38 @@ async def callback_stand(callback: CallbackQuery) -> None:
 
     await callback.answer(text=result.message, show_alert=True)
 
-    if result.success:
+    if not result.success:
+        return
+
+    if not result.round_over:
         await callback.message.edit_text(text=bj.get_round_text(chat_id), parse_mode='HTML',
                                          reply_markup=kb.bj_actions(chat_id))
-        await callback.bot.send_message(chat_id, text=f'{us.get_user_link(user_id)} завершив(-ла) набирати карти 🃏',
+        await callback.bot.send_message(chat_id, text=f'{us.get_user_link(user_id)} завершив(-ла) набирати карти 🏁',
                                         parse_mode='HTML')
+        return
+    # TODO
+    ...
+
+
+async def process_dealer_phase(bot: Bot, chat_id: int) -> None:
+    await bot.send_message(chat_id, 'Гравці походили! Черга дилера 🤵‍♂️')
+
+    while True:
+        result = bj.dealer_act(chat_id)
+
+        await bot.send_message(chat_id, result.message)
+
+        if not result.success:
+            return
+
+        active_players = bj.refresh_pending_round(chat_id)
+
+        if len(active_players) != 0:
+            await bot.send_message(chat_id, text=bj.get_round_text(chat_id),
+                                   reply_markup=kb.bj_actions(chat_id), parse_mode='HTML')
+            return
+
+        if result.status == 'playing':
+            continue
+
+        # status == bust stand and no active players => end game

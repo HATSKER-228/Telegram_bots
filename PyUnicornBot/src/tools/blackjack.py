@@ -247,18 +247,17 @@ def dealer_act(chat_id: int) -> BjDealerActResult:
 
     dealer = data[str_chat_id]['dealer']
     summ = calculate_hand(dealer['hand'])
-    if summ < 17:
+
+    if summ > 21:
+        data[str_chat_id]['dealer']['status'] = 'bust'
+        result = BjDealerActResult(message='Дилер завершив брати карти 🏁', status='bust')
+    elif summ < 17:
         card = data[str_chat_id]['deck'].pop()
         data[str_chat_id]['dealer']['hand'].append(card)
-
-        if calculate_hand(data[str_chat_id]['dealer']['hand']) > 21:
-            data[str_chat_id]['dealer']['status'] = 'bust'
-            result = BjDealerActResult(message='Дилер взяв карту', status='bust')
-        else:
-            result = BjDealerActResult(message='Дилер взяв карту', status='playing')
+        result = BjDealerActResult(message='Дилер взяв карту 🃏', status='playing')
     else:
         data[str_chat_id]['dealer']['status'] = 'stand'
-        result = BjDealerActResult(message='Дилер завершив брати карти', status='playing')
+        result = BjDealerActResult(message='Дилер завершив брати карти 🏁', status='stand')
 
     touch_game(data, str_chat_id)
     save_data(data)
