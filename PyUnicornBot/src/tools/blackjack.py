@@ -266,4 +266,12 @@ def dealer_act(chat_id: int) -> BjDealerActResult:
 
 
 def refresh_pending_round(chat_id: int) -> list[str]:
-    ...
+    str_chat_id = str(chat_id)
+    data = load_data()[str_chat_id]
+
+    players = [uid for uid, inf in data[str_chat_id]['players'].items() if inf['status'] == 'playing']
+
+    data[str_chat_id]['pending_this_round'] = players
+    touch_game(data, str_chat_id)
+    save_data(data)
+    return players
