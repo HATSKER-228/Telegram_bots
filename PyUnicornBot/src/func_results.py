@@ -19,9 +19,18 @@ class SetNumberResult:
 class BjHitResult:
     message: str
     success: bool = False
+    round_over: bool = False
 
 
 @dataclass
 class BjStandResult:
     message: str
     success: bool = False
+    round_over: bool = False
+
+
+@dataclass
+class BjDealerActResult:
+    message: str
+    status: str | None = None
+    success: bool = True

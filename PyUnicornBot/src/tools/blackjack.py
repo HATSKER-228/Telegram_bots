@@ -2,7 +2,7 @@ import json
 from time import time
 from random import shuffle
 
-from src.func_results import BjHitResult, BjStandResult
+from src.func_results import BjHitResult, BjStandResult, BjDealerActResult
 from src.tools import user as us
 from src.config import DATA_DIR
 
@@ -197,11 +197,13 @@ def hit(chat_id: int, player_id: int) -> BjHitResult:
     if summ > 21:
         data[str_chat_id]['players'][str_player_id]['status'] = 'bust'
 
+    round_over = True if not data[str_chat_id]['pending_this_round'] else False
+
     touch_game(data, str_chat_id)
     save_data(data)
 
     message = get_show_hand_text(chat_id, player_id)
-    return BjHitResult(message=message, success=True)
+    return BjHitResult(message=message, success=True, round_over=round_over)
 
 
 def stand(chat_id: int, player_id: int) -> BjStandResult:
@@ -227,8 +229,41 @@ def stand(chat_id: int, player_id: int) -> BjStandResult:
     data[str_chat_id]['pending_this_round'].remove(str_player_id)
     data[str_chat_id]['players'][str_player_id]['status'] = 'stand'
 
+    round_over = True if not data[str_chat_id]['pending_this_round'] else False
+
     touch_game(data, str_chat_id)
     save_data(data)
 
     message = get_show_hand_text(chat_id, player_id)
-    return BjStandResult(message=message, success=True)
+    return BjStandResult(message=message, success=True, round_over=round_over)
+
+
+def dealer_act(chat_id: int) -> BjDealerActResult:
+    data = load_data()
+    str_chat_id = str(chat_id)
+
+    if str_chat_id not in data:
+        return BjDealerActResult(success=False, message='В цьому чаті нема гри')
+
+    dealer = data[str_chat_id]['dealer']
+    summ = calculate_hand(dealer['hand'])
+    if summ < 17:
+        card = data[str_chat_id]['deck'].pop()
+        data[str_chat_id]['dealer']['hand'].append(card)
+
+        if calculate_hand(data[str_chat_id]['dealer']['hand']) > 21:
+            data[str_chat_id]['dealer']['status'] = 'bust'
+            result = BjDealerActResult(message='Дилер взяв карту', status='bust')
+        else:
+            result = BjDealerActResult(message='Дилер взяв карту', status='playing')
+    else:
+        data[str_chat_id]['dealer']['status'] = 'stand'
+        result = BjDealerActResult(message='Дилер завершив брати карти', status='playing')
+
+    touch_game(data, str_chat_id)
+    save_data(data)
+    return result
+
+
+def refresh_pending_round(chat_id: int) -> list[str]:
+    ...
