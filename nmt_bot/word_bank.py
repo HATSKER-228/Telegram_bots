@@ -10,7 +10,7 @@ from pathlib import Path
 VOWELS = set("аеиіоуюяїє")
 
 # Сучасний український алфавіт (33 літери) - потрібен для діапазонів "А-В"
-UKR_ALPHABET = "абвгґдежзиіїйклмнопрстуфхцчшщьюя"
+UKR_ALPHABET = "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя"
 
 DATA_PATH = Path(__file__).parent / "words.json"
 
@@ -81,7 +81,7 @@ def parse_letters(text: str):
     for part in parts:
         if not part:
             continue
-        m = re.match(r"^([а-щьюяєіїй])\s*[-–—]\s*([а-щьюяєіїй])$", part)
+        m = re.match(r"^([а-щґьюяєіїй])\s*[-–—]\s*([а-щґьюяєіїй])$", part)
         if m:
             a, b = m.group(1), m.group(2)
             ia, ib = UKR_ALPHABET.index(a), UKR_ALPHABET.index(b)
@@ -104,3 +104,36 @@ def filter_by_letters(letters):
 def sample_words(pool: list[dict], count: int) -> list[dict]:
     count = min(count, len(pool))
     return random.sample(pool, count)
+
+
+def format_entry(entry: dict) -> str:
+    """Слово з великою літерою на наголошеному складі (+ примітка)."""
+    text = apply_stress(entry["word"], entry["stress"])
+    if entry.get("note"):
+        text += f" ({entry['note']})"
+    return text
+
+
+def format_theory(pool: list[dict], limit: int = 3800) -> list[str]:
+    """Список слів, згрупований за першою літерою, розбитий на повідомлення
+    довжиною до `limit` символів (ліміт Telegram — 4096)."""
+    groups: dict[str, list[dict]] = {}
+    for w in pool:
+        groups.setdefault(w["word"][0], []).append(w)
+
+    blocks = []
+    for letter in sorted(groups, key=lambda c: UKR_ALPHABET.index(c)):
+        lines = [format_entry(w) for w in groups[letter]]
+        blocks.append(f"<b>{letter.upper()}</b>\n" + "\n".join(lines))
+
+    chunks: list[str] = []
+    current = ""
+    for block in blocks:
+        if current and len(current) + len(block) + 2 > limit:
+            chunks.append(current)
+            current = block
+        else:
+            current = f"{current}\n\n{block}" if current else block
+    if current:
+        chunks.append(current)
+    return chunks
