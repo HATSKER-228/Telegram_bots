@@ -4,9 +4,11 @@ from random import shuffle
 
 from src.func_results import BjHitResult, BjStandResult, BjDealerActResult
 from src.tools import user as us
+from src.tools import blackjack_stats as bj_stats
 from src.config import DATA_DIR
 
 FILE_PATH = DATA_DIR / 'blackjack.json'
+RESULT_EMOJI: dict[str, str] = {'win': '🏆', 'draw': '🤝', 'lose': '❌'}
 
 
 def load_data() -> dict:
@@ -31,6 +33,12 @@ def build_deck() -> list[str]:
     deck = [r+s for r in ranks for s in suits]
     shuffle(deck)
     return deck
+
+
+def draw_card(game: dict) -> str:
+    if not game['deck']:
+        game['deck'] = build_deck()
+    return game['deck'].pop()
 
 
 def calculate_hand(hand: list[str]) -> int:
@@ -65,7 +73,10 @@ def get_round_text(chat_id: int) -> str:
     players_links = [us.get_user_link(int(uid)) for uid in active_players]
 
     text = f'🎲 Наступний раунд! Оберіть дію.\n\n'
-    text += 'Ще не походили:\n' + '\n'.join(f'• {link}' for link in players_links)
+    if len(players_links) != 0:
+        text += 'Ще не походили:\n' + '\n'.join(f'• {link}' for link in players_links)
+    else:
+        text += 'Всі походили!'
     return text
 
 
@@ -85,7 +96,7 @@ def get_show_hand_text(chat_id: int, user_id: int) -> str:
     text = 'Твої карти: ' + ', '.join(hand)
     text += f'\nСума: {calculate_hand(hand)}'
 
-    if data[str_chat_id]['players'][str_user_id]['status'] == 'bust':
+    if calculate_hand(hand) > 21:
         text += '\nТи перебрав 💥'
     elif data[str_chat_id]['players'][str_user_id]['status'] == 'stand':
         text += '\nТи завершив брати карти 🏁'
@@ -183,21 +194,18 @@ def hit(chat_id: int, player_id: int) -> BjHitResult:
     if data[str_chat_id]['players'][str_player_id]['status'] == 'stand':
         return BjHitResult(message='Ти вже завершив(-ла) брати карти 🏁')
 
-    if data[str_chat_id]['players'][str_player_id]['status'] == 'bust':
+    if data[str_chat_id]['players'][str_player_id]['status'] == 'bust' or \
+            calculate_hand(data[str_chat_id]['players'][str_player_id]['hand']) > 21:
         return BjHitResult(message='Ти вже перебрав(-ла) 💥')
 
     if str_player_id not in data[str_chat_id]['pending_this_round']:
         return BjHitResult(message='Ти вже зробив(-ла) хід')
 
-    card = data[str_chat_id]['deck'].pop()
+    card = draw_card(data[str_chat_id])
     data[str_chat_id]['players'][str_player_id]['hand'].append(card)
     data[str_chat_id]['pending_this_round'].remove(str_player_id)
-    summ = calculate_hand(data[str_chat_id]['players'][str_player_id]['hand'])
 
-    if summ > 21:
-        data[str_chat_id]['players'][str_player_id]['status'] = 'bust'
-
-    round_over = True if not data[str_chat_id]['pending_this_round'] else False
+    round_over = not data[str_chat_id]['pending_this_round']
 
     touch_game(data, str_chat_id)
     save_data(data)
@@ -227,9 +235,12 @@ def stand(chat_id: int, player_id: int) -> BjStandResult:
         return BjStandResult(message='Ти вже зробив(-ла) хід')
 
     data[str_chat_id]['pending_this_round'].remove(str_player_id)
-    data[str_chat_id]['players'][str_player_id]['status'] = 'stand'
+    if calculate_hand(data[str_chat_id]['players'][str_player_id]['hand']) <= 21:
+        data[str_chat_id]['players'][str_player_id]['status'] = 'stand'
+    else:
+        data[str_chat_id]['players'][str_player_id]['status'] = 'bust'
 
-    round_over = True if not data[str_chat_id]['pending_this_round'] else False
+    round_over = not data[str_chat_id]['pending_this_round']
 
     touch_game(data, str_chat_id)
     save_data(data)
@@ -246,13 +257,18 @@ def dealer_act(chat_id: int) -> BjDealerActResult:
         return BjDealerActResult(success=False, message='В цьому чаті нема гри')
 
     dealer = data[str_chat_id]['dealer']
+
+    if dealer['status'] != 'playing':
+        result = BjDealerActResult(message='Дилер вже не грає')
+        return result
+
     summ = calculate_hand(dealer['hand'])
 
     if summ > 21:
         data[str_chat_id]['dealer']['status'] = 'bust'
         result = BjDealerActResult(message='Дилер завершив брати карти 🏁', status='bust')
     elif summ < 17:
-        card = data[str_chat_id]['deck'].pop()
+        card = draw_card(data[str_chat_id])
         data[str_chat_id]['dealer']['hand'].append(card)
         result = BjDealerActResult(message='Дилер взяв карту 🃏', status='playing')
     else:
@@ -266,7 +282,7 @@ def dealer_act(chat_id: int) -> BjDealerActResult:
 
 def refresh_pending_round(chat_id: int) -> list[str]:
     str_chat_id = str(chat_id)
-    data = load_data()[str_chat_id]
+    data = load_data()
 
     players = [uid for uid, inf in data[str_chat_id]['players'].items() if inf['status'] == 'playing']
 
@@ -274,3 +290,70 @@ def refresh_pending_round(chat_id: int) -> list[str]:
     touch_game(data, str_chat_id)
     save_data(data)
     return players
+
+
+def build_final_text(game: dict, outcomes: dict[str, str]) -> str:
+    dealer_hand: list[str] = game['dealer']['hand']
+    dealer_sum = calculate_hand(dealer_hand)
+
+    text = '🏁 <b>Гру завершено!</b>\n\n'
+    text += f'🤵‍♂️ Дилер: {", ".join(dealer_hand)} — {dealer_sum}'
+    text += ' 💥\n\n' if dealer_sum > 21 else '\n\n'
+
+    rows = [(uid, info['hand'], calculate_hand(info['hand']))
+            for uid, info in game['players'].items()]
+    rows.sort(key=lambda r: r[2] if r[2] <= 21 else -1, reverse=True)
+
+    for uid, hand, summ in rows:
+        bust = ' 💥' if summ > 21 else ''
+        text += (f'{RESULT_EMOJI[outcomes[uid]]} {us.get_user_link(int(uid))}: '
+                 f'{", ".join(hand)} — {summ}{bust}\n')
+
+    if 'win' not in outcomes.values():
+        text += '\nПереможців немає, дилер переміг 🤵‍♂️'
+
+    return text
+
+
+def determine_outcomes(chat_id: int, data: dict | None = None) -> dict[str, str]:
+    str_chat_id = str(chat_id)
+    if not data:
+        data = load_data()
+
+    dealer_sum = calculate_hand(data[str_chat_id]['dealer']['hand'])
+
+    results = {}
+    for uid, player_data in data[str_chat_id]['players'].items():
+        uid = str(uid)
+        s = calculate_hand(player_data['hand'])
+        if s > 21:
+            results[uid] = 'lose'
+        elif dealer_sum > 21:
+            results[uid] = 'win'
+        elif dealer_sum > s:
+            results[uid] = 'lose'
+        elif dealer_sum == s:
+            results[uid] = 'draw'
+        else:
+            results[uid] = 'win'
+
+    return results
+
+
+def finish_game(chat_id: int) -> str:
+    data = load_data()
+    game = data[str(chat_id)]
+
+    outcomes = determine_outcomes(chat_id, data)
+    text = build_final_text(game, outcomes)
+
+    bj_stats.update_stats(outcomes)
+    delete_game(chat_id)
+
+    return text
+
+
+def delete_game(chat_id: int) -> None:
+    data = load_data()
+    if data.pop(str(chat_id), None) is not None:
+        save_data(data)

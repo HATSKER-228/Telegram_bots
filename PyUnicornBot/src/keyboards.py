@@ -31,5 +31,5 @@ def bj_join_game(chat_id: int) -> InlineKeyboardMarkup:
 def bj_actions(chat_id: int) -> InlineKeyboardMarkup:
     hit = InlineKeyboardButton(text='Добрати🃏', callback_data=f'bj_hit/{chat_id}')
     stand = InlineKeyboardButton(text='Утриматись✋', callback_data=f'bj_stand/{chat_id}')
-    show_hand = InlineKeyboardButton(text='Нагади мої карти👀', callback_data=f'bj_show/{chat_id}')
+    show_hand = InlineKeyboardButton(text='Нагадати мої карти👀', callback_data=f'bj_show/{chat_id}')
     return InlineKeyboardMarkup(inline_keyboard=[[hit, stand], [show_hand]])
